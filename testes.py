@@ -11,6 +11,7 @@ import sys
 import tempfile
 
 from loja import cadastro
+from loja import caixa
 from loja import estoque
 from loja import formatacao
 from loja import leitura
@@ -106,6 +107,59 @@ def testar_estoque():
     return falhas
 
 
+def testar_carrinho():
+    falhas = 0
+    caderno = cadastro.criar_produto(1, "Caderno", 1999, 10)
+    caneta = cadastro.criar_produto(2, "Caneta", 500, 10)
+    carrinho = []
+    caixa.adicionar_ao_carrinho(carrinho, caderno, 2)
+    caixa.adicionar_ao_carrinho(carrinho, caderno, 1)
+    falhas = falhas + verificar("mesmo produto soma no mesmo item", len(carrinho), 1)
+    falhas = falhas + verificar("quantidade somada (2 + 1)", caixa.quantidade_no_carrinho(carrinho, 1), 3)
+    caixa.adicionar_ao_carrinho(carrinho, caneta, 2)
+    falhas = falhas + verificar("subtotal 3 x R$ 19,99", carrinho[0]["subtotal_centavos"], 5997)
+    falhas = falhas + verificar("total 3 x 19,99 + 2 x 5,00", caixa.calcular_total(carrinho), 6997)
+    falhas = falhas + verificar("produto fora do carrinho tem 0", caixa.quantidade_no_carrinho(carrinho, 99), 0)
+    caderno["preco_centavos"] = 2500
+    falhas = falhas + verificar("preço fica congelado no item", carrinho[0]["preco_unitario_centavos"], 1999)
+    removeu = caixa.remover_do_carrinho(carrinho, 2)
+    falhas = falhas + verificar("remover item do carrinho", removeu, True)
+    falhas = falhas + verificar("carrinho fica com 1 item", len(carrinho), 1)
+    falhas = falhas + verificar("remover item ausente devolve False", caixa.remover_do_carrinho(carrinho, 2), False)
+    return falhas
+
+
+def testar_venda():
+    falhas = 0
+    data = "13/10/2026 10:00"
+    produtos = [cadastro.criar_produto(1, "Caderno", 1999, 10), cadastro.criar_produto(2, "Caneta", 500, 4)]
+    vendas = []
+    movimentacoes = []
+    carrinho = []
+    caixa.adicionar_ao_carrinho(carrinho, produtos[0], 3)
+    caixa.adicionar_ao_carrinho(carrinho, produtos[1], 2)
+    venda = caixa.efetivar_venda(produtos, vendas, movimentacoes, carrinho, data)
+    falhas = falhas + verificar("venda registrada", len(vendas), 1)
+    falhas = falhas + verificar("número da venda", venda["numero"], 1)
+    falhas = falhas + verificar("total da venda R$ 69,97", venda["total_centavos"], 6997)
+    falhas = falhas + verificar("saldo do caderno baixou (10 -> 7)", produtos[0]["saldo"], 7)
+    falhas = falhas + verificar("saldo da caneta baixou (4 -> 2)", produtos[1]["saldo"], 2)
+    falhas = falhas + verificar("uma movimentação VENDA por item", len(movimentacoes), 2)
+    falhas = falhas + verificar("movimentação do tipo VENDA", movimentacoes[0]["tipo"], "VENDA")
+
+    # Venda impossível: o segundo item não tem saldo -> nada pode mudar
+    carrinho = []
+    caixa.adicionar_ao_carrinho(carrinho, produtos[0], 1)
+    caixa.adicionar_ao_carrinho(carrinho, produtos[1], 5)
+    venda = caixa.efetivar_venda(produtos, vendas, movimentacoes, carrinho, data)
+    falhas = falhas + verificar("venda sem saldo devolve None", venda, None)
+    falhas = falhas + verificar("primeiro item não baixou (tudo-ou-nada)", produtos[0]["saldo"], 7)
+    falhas = falhas + verificar("nenhuma venda nova", len(vendas), 1)
+    falhas = falhas + verificar("nenhuma movimentação nova", len(movimentacoes), 2)
+    falhas = falhas + verificar("carrinho vazio não vira venda", caixa.efetivar_venda(produtos, vendas, movimentacoes, [], data), None)
+    return falhas
+
+
 def testar_persistencia():
     falhas = 0
     pasta = tempfile.mkdtemp()
@@ -150,6 +204,8 @@ def main():
     total_falhas = total_falhas + testar_formatar_moeda()
     total_falhas = total_falhas + testar_cadastro()
     total_falhas = total_falhas + testar_estoque()
+    total_falhas = total_falhas + testar_carrinho()
+    total_falhas = total_falhas + testar_venda()
     total_falhas = total_falhas + testar_persistencia()
     print()
     if total_falhas > 0:
