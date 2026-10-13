@@ -96,16 +96,21 @@ O resultado esperado é `Todos os testes passaram.`, com código de saída 0.
 ## 3. Funcionalidades (menu)
 
 ```
-========= CONTROLE DE ESTOQUE E VENDAS =========
-1 - Cadastrar produto
-2 - Registrar entrada de itens
-3 - Registrar saída avulsa (perda, avaria, uso interno)
-4 - Registrar venda
-5 - Consultar saldo de um produto
-6 - Listar estoque
-7 - Relatórios
-0 - Sair
+====================================================
+           CONTROLE DE ESTOQUE E VENDAS
+====================================================
+  1 - Cadastrar produto
+  2 - Registrar entrada de itens
+  3 - Registrar saída avulsa (perda, avaria, uso interno)
+  4 - Registrar venda
+  5 - Consultar saldo de um produto
+  6 - Listar estoque
+  7 - Relatórios
+  0 - Sair
+----------------------------------------------------
 ```
+
+**Visual:** em terminais que entendem cores (Windows Terminal, terminal do VS Code, Linux/macOS), as mensagens aparecem em **verde** (sucesso), **vermelho** (erro) e **amarelo** (aviso). Depois de cada operação, o programa espera um **Enter** e limpa a tela antes de mostrar o menu de novo. No `cmd` antigo do Windows, ou com a entrada e a saída redirecionadas, ele mostra texto simples, sem cores e sem pausa.
 
 | Opção | O que faz |
 |-------|-----------|
@@ -126,7 +131,7 @@ O resultado esperado é `Todos os testes passaram.`, com código de saída 0.
 ├── loja/                # pacote com os módulos do sistema (só funções)
 │   ├── leitura.py       # lê do teclado com validação (único módulo com input())
 │   ├── telas.py         # uma função para cada opção do menu (perguntas e resultados)
-│   ├── formatacao.py    # transforma valores em texto (R$ 1.234,56, linhas de tabela)
+│   ├── formatacao.py    # transforma valores em texto (R$ 1.234,56, tabelas e cores)
 │   ├── cadastro.py      # cria, busca e cadastra produtos
 │   ├── estoque.py       # entrada, saída e histórico (único lugar onde o saldo muda)
 │   ├── caixa.py         # carrinho e registro da venda (tudo-ou-nada)
@@ -217,6 +222,7 @@ As mensagens de commit indicam a etapa entre parênteses, por exemplo `feat(fase
 | `fase-2` | Entrada de itens, saída avulsa, histórico de movimentações e extrato |
 | `fase-3` | Carrinho e venda com vários itens, comprovante, relatórios e dados de exemplo |
 | `fase-4` | Documentação: README e explicação da solução |
+| `visual` | Melhorias de apresentação no terminal: cores, menu em moldura e tela limpa entre as operações |
 | `fix` / `refactor` | Correções e ajustes encontrados ao testar e revisar o programa (validação do arquivo, venda com produto repetido, acentuação no Git Bash, legibilidade) |
 
 ### Uso de ferramentas

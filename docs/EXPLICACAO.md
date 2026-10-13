@@ -44,7 +44,7 @@ persistencia.salvar ────┘     se o estado mudou, salva no arquivo
 
 O código é dividido em três camadas:
 
-- **Interação** (`leitura`, `telas`, `formatacao` e o próprio `main.py`): `leitura` é o único módulo com `input()`; `telas` e `main.py` mostram mensagens com `print()`; `formatacao` só monta os textos (devolve strings) que as telas imprimem.
+- **Interação** (`leitura`, `telas`, `formatacao` e o próprio `main.py`): `leitura` é o único módulo com `input()`; `telas` e `main.py` mostram mensagens com `print()`; `formatacao` só monta os textos (devolve strings, inclusive com as cores) que as telas imprimem.
 - **Regras** (`cadastro`, `estoque`, `caixa`, `relatorios`): recebem dados prontos, calculam e alteram as listas, sem `input()` nem `print()`. Por isso podem ser testadas automaticamente em `testes.py`.
 - **Dados** (`persistencia`): é o único módulo que abre arquivos.
 
@@ -71,22 +71,24 @@ return f"{sinal}R$ {reais_texto},{resto:02d}"   # "R$ 1.234,56"
 
 **`main.py`, função `main`:** a sequência do programa inteiro. Ela:
 
-1. configura o terminal;
+1. configura o terminal e limpa a tela;
 2. carrega os dados (se o arquivo não puder ser aberto, avisa e encerra);
 3. mostra o aviso, se houver;
 4. chama `executar_menu(produtos, vendas, movimentacoes)` dentro de um `try`.
 
 ```python
 configurar_acentos()
+telas.limpar_tela()
 try:
     produtos, vendas, movimentacoes, aviso = persistencia.carregar_dados(CAMINHO_DADOS,
                                                                          CAMINHO_EXEMPLO)
 except OSError:
-    print("Não foi possível abrir o arquivo de dados (ele está aberto em outro programa?).")
+    print(formatacao.erro("Não foi possível abrir o arquivo de dados "
+                          + "(ele está aberto em outro programa?)."))
     print("Feche o arquivo e execute o programa de novo.")
     return
 if aviso != "":
-    print(aviso)
+    print(formatacao.aviso(aviso))
 ```
 
 A **ordem importa**: as listas só existem depois de `carregar_dados`, e o menu só pode começar depois disso. A seção 5.2 traz mais exemplos de por que a ordem das instruções muda o resultado.
@@ -136,7 +138,8 @@ estoque.registrar_entrada(produto, quantidade, movimentacoes,
                           data_hora_atual(), estoque.MOTIVO_COMPRA)
 nome = produto["nome"]
 saldo_depois = produto["saldo"]
-print(f"Entrada registrada. Saldo de {nome}: {saldo_antes} -> {saldo_depois}")
+mensagem = f"Entrada registrada. Saldo de {nome}: {saldo_antes} -> {saldo_depois}"
+print(formatacao.sucesso(mensagem))
 ```
 
 ### 2.3 Estruturas de decisão
@@ -152,16 +155,17 @@ elif opcao == 2:
 elif opcao == 0:
     executando = False
 else:
-    print("Opção inválida.")
+    print(formatacao.erro("Opção inválida."))
 ```
 
 **`loja/leitura.py`, função `ler_inteiro`:** três caminhos para o valor digitado.
 
 ```python
 if numero == -1:
-    print("Valor inválido: digite só números inteiros, sem sinal, com até 6 dígitos.")
+    print(formatacao.erro("Valor inválido: digite só números inteiros, "
+                          + "sem sinal, com até 6 dígitos."))
 elif numero < minimo:
-    print(f"Digite um número maior ou igual a {minimo}.")
+    print(formatacao.erro(f"Digite um número maior ou igual a {minimo}."))
 else:
     valido = True
 ```
@@ -268,6 +272,7 @@ Por isso `cadastro.buscar_produto` devolve o **próprio dicionário** que está 
 - **Constantes de módulo:**
   - São os nomes em MAIÚSCULAS, como `CAMINHO_DADOS` (`main.py`), `MAXIMO_DIGITOS` (`leitura.py`), `TIPO_VENDA` e `MOTIVOS_SAIDA` (`estoque.py`).
   - Ficam no nível do módulo, mas **só são lidas, nunca alteradas**. `MOTIVOS_SAIDA` é uma tupla, que nem pode ser modificada.
+  - `TERMINAL_INTERATIVO` e `CORES_ATIVAS` (`formatacao.py`) também são constantes: são **calculadas uma única vez**, quando o módulo é carregado (`CORES_ATIVAS = suporta_cores(TERMINAL_INTERATIVO, os.name, os.environ)`), e nunca mudam depois. A decisão em si fica na função `suporta_cores`, que recebe tudo por parâmetro e por isso é testada em `testes.py`.
   - Por isso o programa não tem **estado global mutável**: o comando `global` não aparece no código, e todo o estado que muda passa por parâmetro.
 
 ## 3. Mapa de mutações: onde cada parte do estado muda
