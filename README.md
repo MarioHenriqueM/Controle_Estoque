@@ -4,7 +4,7 @@
 **Disciplina:** Paradigmas de Programação, UNAMA. Prof. Rodrigo Medeiros Costa
 **Atividade:** Avaliativa AV1, resolução de problema com **paradigma imperativo** (Python)
 
-🎥 **Vídeo de demonstração:** _(link do vídeo aqui)_
+ **Vídeo de demonstração:** _(link do vídeo aqui)_
 
 Programa de terminal que controla o estoque e as vendas de um pequeno comércio. Ele permite cadastrar produtos, registrar entradas e saídas de itens, consultar saldos, registrar vendas com vários itens e calcular os valores vendidos. Foi escrito no paradigma **imperativo/procedural**: o programa é uma sequência de instruções que alteram o estado dos dados (variáveis, listas e dicionários) usando atribuições, decisões (`if/elif/else`), repetições (`while`/`for`) e funções. Não usa classes nem recursos de outros paradigmas.
 
@@ -28,24 +28,27 @@ Um pequeno comércio (por exemplo, uma papelaria) precisa saber **quanto tem de 
 
 | Operação | O usuário informa |
 |----------|-------------------|
-| Cadastro de produto | código (inteiro ≥ 1), nome (até 30 caracteres), preço de venda (ex.: `19,99`) e saldo inicial (inteiro ≥ 0) |
-| Entrada de itens | código do produto e quantidade (inteiro ≥ 1) |
-| Saída avulsa | código, quantidade e motivo (perda, avaria ou uso interno) |
-| Venda | um ou mais itens (código + quantidade), com opção de remover itens, e a confirmação (s/n) |
-| Consultas e relatórios | código do produto ou número da opção desejada |
+| Cadastro de produto | código (inteiro de 1 a 999.999, único), nome (não vazio, até 30 caracteres), preço de venda (de R$ 0,01 a R$ 999.999,99, com vírgula ou ponto e sem separador de milhar, ex.: `19,99`) e saldo inicial (inteiro de 0 a 999.999) |
+| Entrada de itens | código do produto e quantidade (inteiro de 1 a 999.999) |
+| Saída avulsa | código, quantidade (inteiro de 1 a 999.999, até o saldo) e motivo (1 perda, 2 avaria, 3 uso interno) |
+| Venda | um ou mais itens (código + quantidade, até o disponível), com opção de remover itens, e a confirmação (`s`/`n`) |
+| Menus | número da opção (0 a 7 no menu principal; 0 a 4 no de relatórios) |
 
-### Regras principais
+### Regras do negócio
 
 1. **Código único:** não é possível cadastrar dois produtos com o mesmo código.
-2. **Entradas validadas:** texto em campo numérico, números negativos, zero onde não cabe e valores grandes demais são recusados com uma mensagem, e a pergunta se repete (o programa não "quebra").
-3. **Dinheiro em centavos:** os preços são guardados como números inteiros de centavos (`19,99` vira `1999`), o que evita erros de arredondamento de números com casas decimais. Na tela, aparecem como `R$ 1.234,56`.
-4. **Sem saldo, sem saída:** uma saída avulsa ou venda só acontece se houver saldo suficiente. Caso contrário, **nada é alterado**.
-5. **Saída avulsa não é venda:** perda, avaria ou uso interno diminuem o estoque, mas **não** entram no faturamento.
-6. **Venda com vários itens:** o carrinho pode ter vários produtos. Adicionar de novo o mesmo produto soma no mesmo item, e o disponível é o saldo menos o que já está no carrinho. A venda é **tudo-ou-nada**: ou todos os itens baixam do estoque, ou nenhum.
-7. **Preço congelado:** cada item vendido guarda o nome e o preço do momento da venda, então os comprovantes e relatórios antigos não mudam.
-8. **Histórico:** toda entrada, saída avulsa e venda gera um registro de movimentação com data, tipo, quantidade, motivo e saldo após a operação.
-9. **Relatórios:** o faturamento soma só as vendas. O ticket médio é o faturamento dividido pelo número de vendas, arredondado ao centavo. Sem vendas, o programa avisa em vez de dividir por zero.
-10. **Persistência:** os dados ficam em `dados/loja.json` e são salvos após cada operação, com gravação segura (arquivo temporário + troca). Se o arquivo estiver corrompido, o programa guarda uma cópia `.corrompido`, avisa e começa vazio.
+2. **Entradas validadas:** valores fora dos limites acima (texto em campo numérico, negativos, zero onde não cabe, números grandes demais) são recusados com uma mensagem, e a pergunta se repete. O programa não "quebra".
+3. **Sem saldo, sem saída:** uma saída avulsa ou venda só acontece se houver saldo suficiente. Caso contrário, **nada é alterado**.
+4. **Saída avulsa não é venda:** perda, avaria ou uso interno diminuem o estoque, mas **não** entram no faturamento.
+5. **Venda com vários itens:** o carrinho pode ter vários produtos. Adicionar de novo o mesmo produto soma no mesmo item, e o disponível é o saldo menos o que já está no carrinho. A venda é **tudo-ou-nada**: ou todos os itens baixam do estoque, ou nenhum.
+6. **Preço congelado:** cada item vendido guarda o nome e o preço do momento da venda, então os comprovantes e relatórios antigos não mudam.
+7. **Histórico:** toda entrada, saída avulsa e venda gera um registro de movimentação com data, tipo, quantidade, motivo e saldo após a operação.
+8. **Relatórios:** o faturamento soma só as vendas. O ticket médio é o faturamento dividido pelo número de vendas, arredondado ao centavo. Sem vendas, o programa avisa em vez de dividir por zero.
+
+### Decisões técnicas
+
+- **Dinheiro em centavos:** os preços são guardados como inteiros de centavos (`19,99` vira `1999`), o que evita os erros de arredondamento dos números com casas decimais. Na tela, aparecem como `R$ 1.234,56`.
+- **Persistência:** os dados ficam em `dados/loja.json` e são salvos após cada operação, com gravação segura (arquivo temporário + troca). Se o arquivo estiver corrompido ou com formato inválido, o programa guarda uma cópia `.corrompido`, avisa e começa vazio.
 
 ### Resultados esperados
 
@@ -54,6 +57,10 @@ Um pequeno comércio (por exemplo, uma papelaria) precisa saber **quanto tem de 
 - **Extrato** de movimentações de cada produto na consulta de saldo.
 - **Relatórios:** faturamento total (com número de vendas e ticket médio), vendas por produto, valor do estoque (saldo × preço) e lista de todas as vendas.
 - Os dados continuam lá ao fechar e abrir o programa de novo.
+- Operações inválidas são recusadas **sem alterar nada**, com mensagens como:
+  - saída de 100 cadernos com saldo 47 → `Saldo insuficiente (há 47 unidade(s)). Nada foi alterado.`
+  - cadastro com código já usado → `Já existe um produto com o código 1. Cadastro cancelado.`
+  - preço `abc` → `Preço inválido. Use o formato 12,50 (de R$ 0,01 a R$ 999.999,99, sem separador de milhar).`
 
 ### Exemplo verificável (dados de exemplo)
 
@@ -136,7 +143,7 @@ O estado do programa são **três listas** criadas no `main.py` e passadas como 
 
 ## 5. Explicação da solução
 
-📄 **Explicação completa, com trechos do código e teste de mesa: [docs/EXPLICACAO.md](docs/EXPLICACAO.md)**
+ **Explicação completa, com trechos do código e teste de mesa: [docs/EXPLICACAO.md](docs/EXPLICACAO.md)**
 
 Resumo da lógica: o `main.py` carrega o estado (três listas: `produtos`, `vendas`, `movimentacoes`) e repete o menu até o usuário sair. Cada opção chama uma tela, que lê os dados, chama a regra correspondente e mostra o resultado. Depois de cada operação que altera o estado, os dados são salvos.
 
@@ -144,44 +151,73 @@ Onde estão os elementos do paradigma imperativo:
 
 | Elemento | Exemplo no código |
 |----------|-------------------|
-| Sequência de instruções | `formatacao.formatar_moeda`: calcula reais e centavos passo a passo. `main.main`: carregar → avisar → executar o menu |
-| Alteração de estado (variáveis e atribuições) | `estoque.registrar_entrada`: `produto["saldo"] = produto["saldo"] + quantidade`. Acumulador `total_centavos` em `caixa.calcular_total`. `executando = False` no menu |
-| Decisões | `if/elif/else` do menu em `main.executar_menu`. `if not tem_saldo_suficiente(...)` em `estoque.registrar_saida`. Validações em `leitura.ler_inteiro` |
-| Repetições | `while executando:` (menu), `while not valido:` (leituras), `for` com acumuladores e laços aninhados em `relatorios.vendas_por_produto` |
-| Funções e procedimentos | Funções que devolvem valores (`calcular_total`, `buscar_produto`, `formatar_moeda`) e procedimentos que alteram as listas recebidas (`registrar_entrada`, `efetivar_venda`) |
+| Sequência de instruções | `formatar_moeda` em [loja/formatacao.py](loja/formatacao.py): calcula reais e centavos passo a passo. `main` em [main.py](main.py): carregar → avisar → executar o menu |
+| Alteração de estado (variáveis e atribuições) | `registrar_entrada` em [loja/estoque.py](loja/estoque.py): `produto["saldo"] = produto["saldo"] + quantidade`. Acumulador `total_centavos` em `calcular_total` ([loja/caixa.py](loja/caixa.py)). `executando = False` no menu |
+| Decisões | `if/elif/else` do menu em `executar_menu` ([main.py](main.py)). `if not tem_saldo_suficiente(...)` em `registrar_saida` ([loja/estoque.py](loja/estoque.py)). Validações em `ler_inteiro` ([loja/leitura.py](loja/leitura.py)) |
+| Repetições | `while executando:` (menu), `while not valido:` (leituras), `for` com acumuladores e laços aninhados em `vendas_por_produto` ([loja/relatorios.py](loja/relatorios.py)) |
+| Funções e procedimentos | Funções sem efeito colateral (`calcular_total`, `buscar_produto`, `formatar_moeda`) e procedimentos que alteram as listas recebidas (`registrar_entrada`, `efetivar_venda`) |
 
-A venda é feita em **duas passadas** (`caixa.efetivar_venda`): primeiro confere o saldo de todos os itens, depois baixa o estoque. Assim, ou a venda acontece inteira, ou nada muda.
+A venda é feita em **duas passadas** (`efetivar_venda`, em [loja/caixa.py](loja/caixa.py)): primeiro confere o saldo de cada produto do carrinho, depois baixa o estoque. Assim, ou a venda acontece inteira, ou nada muda.
+
+A explicação completa também cobre:
+
+- passagem de parâmetros (mutação × reatribuição);
+- escopo e constantes;
+- aliasing e cópias;
+- a ordem das instruções;
+- a comparação com os paradigmas orientado a objetos e funcional, e com C.
 
 ## 6. Reflexão sobre o desenvolvimento
 
 ### Principais decisões
 
-- **Python em vez de C.** O Python já estava instalado e deixa o código mais curto e legível para explicar. Ainda assim, mantive o estilo imperativo "puro": nada de classes, `lambda`, *list comprehensions* ou `map`/`filter`. Todas as repetições são laços `while`/`for` explícitos.
-- **Estado em três listas passadas por parâmetro**, sem variáveis globais. Assim, a assinatura de cada função mostra o que ela pode alterar (por exemplo, `efetivar_venda(produtos, vendas, movimentacoes, carrinho, data)`).
-- **Dinheiro em centavos (inteiros).** Com números de ponto flutuante, `int(0.29 * 100)` dá `28`, e não `29`. Guardando `29` centavos, as somas e multiplicações ficam exatas.
-- **Regras separadas das telas.** Os módulos de regra (`cadastro`, `estoque`, `caixa`, `relatorios`) não usam `input()` nem `print()`. Por isso dá para testá-los automaticamente em `testes.py`.
-- **Venda tudo-ou-nada em duas passadas:** primeiro confere o saldo de todos os itens, depois baixa o estoque. Assim, uma venda nunca fica "pela metade".
-- **Saída avulsa separada da venda.** As duas diminuem o estoque, mas só a venda gera receita.
-- **Gravação segura do arquivo:** o JSON é escrito num arquivo temporário e depois trocado com `os.replace`, para não perder os dados se algo falhar no meio da gravação.
+Cada decisão aparece no formato **o que escolhi** (em vez do quê) e o motivo.
+
+- **Python em estilo procedural** (em vez de C): o Python já estava instalado e deixa o código mais legível. Mantive só construções imperativas, sem classes, `lambda`, *comprehensions* ou `map`/`filter`.
+- **Centavos inteiros** (em vez de `float`): `int(0.29 * 100)` dá `28`, e não `29`. Com inteiros, somas e multiplicações são exatas.
+- **Estado em três listas passadas por parâmetro** (em vez de variáveis globais): a assinatura mostra o que cada função altera, e os testes usam listas próprias.
+- **Regras separadas das telas** (em vez de `input`/`print` dentro das regras): `cadastro`, `estoque`, `caixa` e `relatorios` podem ser testados automaticamente.
+- **Venda em duas passadas** (em vez de baixar item a item): conferir tudo antes garante o tudo-ou-nada.
+- **Saída avulsa separada da venda** (em vez de uma operação só): as duas baixam o estoque, mas só a venda gera receita.
+- **JSON com gravação segura** (em vez de banco de dados): é simples de explicar, e o `.tmp` + `os.replace` evita deixar o arquivo pela metade.
 
 ### Dificuldades encontradas
 
-- **Ler preços digitados com vírgula** (`19,99`) sem usar `float`. A solução foi separar reais e centavos pelo texto e validar cada parte (`texto_para_centavos`).
-- **Produto repetido no carrinho:** adicionar o mesmo produto duas vezes podia ultrapassar o saldo. Passei a calcular o *disponível* como saldo menos o que já está no carrinho e a somar no mesmo item.
-- **Nomes de módulos x nomes de variáveis:** um módulo chamado `vendas.py` entraria em conflito com a lista `vendas` recebida como parâmetro. Por isso os módulos se chamam `caixa`, `cadastro` e `estoque`.
-- **Acentuação no Windows:** ao testar o programa redirecionando a entrada e a saída, os acentos saíam errados. Todo `open()` passou a usar `encoding="utf-8"`.
-- **Ordem das perguntas:** na saída avulsa, o motivo era pedido antes de conferir o saldo. Inverti para recusar logo uma quantidade maior que o saldo.
-- **Arquivo de dados editado à mão:** na revisão final, um JSON válido mas sem as chaves esperadas (por exemplo, um produto sem `"nome"`) derrubava o programa. Passei a validar a estrutura ao carregar (`persistencia.estrutura_valida`), e o arquivo inválido é guardado como cópia `.corrompido`.
+- **Ler preços com vírgula sem usar `float`.** A solução foi separar reais e centavos pelo texto e validar cada parte (`texto_para_centavos`). Os testes "0,29 sem erro de float" e "três casas é inválido" provam o resultado.
+- **Produto repetido no carrinho.** Adicionar o mesmo produto duas vezes podia ultrapassar o saldo. Passei a somar no mesmo item e a calcular o *disponível* como saldo menos o que já está no carrinho. Na revisão final, a confirmação da venda também passou a conferir o **total** de cada produto, garantindo o tudo-ou-nada (teste "produto repetido acima do saldo é recusado").
+- **Nomes de módulos × nomes de variáveis.** Um módulo `vendas.py` entraria em conflito com a lista `vendas` recebida como parâmetro. Por isso os módulos se chamam `caixa`, `cadastro` e `estoque`.
+- **Acentuação no Windows.** Todo `open()` usa `encoding="utf-8"`. Na revisão final, descobri que no Git Bash o menu saía com caracteres trocados e um nome digitado como "Lápis" era gravado como "LÃ¡pis". O `main` passou a configurar UTF-8 na entrada e na saída (`configurar_acentos`).
+- **Ordem das perguntas.** Na saída avulsa, o motivo era pedido antes de conferir o saldo. Inverti para recusar logo uma quantidade maior que o saldo.
+- **Arquivo de dados editado à mão.** Um JSON válido, mas sem as chaves ou com os tipos errados (um produto sem `"nome"`, ou um preço como texto), derrubava o programa. Agora a estrutura é validada ao carregar (`persistencia.estrutura_valida`), e o arquivo inválido é guardado como cópia `.corrompido` (testes "estrutura errada começa vazio" e "preço como texto é inválido").
 
 ### Possíveis melhorias
 
-- Alterar preço e nome de um produto (as vendas antigas não mudariam, porque o preço fica congelado no item).
+**Prioritárias**, porque seriam as mais úteis para o comerciante:
+
+1. Cancelar ou estornar uma venda, devolvendo os itens ao estoque.
+2. Estoque mínimo com alerta de reposição.
+3. Alterar o preço e o nome de um produto. As vendas antigas não mudariam, porque o preço fica congelado no item.
+
+**Outras:**
+
 - Buscar produtos por parte do nome.
-- Estoque mínimo com alerta de reposição.
 - Destacar o produto mais vendido e gerar relatórios por período (data inicial e final).
-- Cancelar ou estornar uma venda, devolvendo os itens ao estoque.
-- Tratar o caso de o arquivo de dados estar aberto ou bloqueado por outro programa no momento em que o sistema inicia.
+- Tratar o caso de o arquivo de dados estar aberto ou bloqueado por outro programa quando o sistema inicia.
 - Interface gráfica ou banco de dados, para um uso real com mais dados.
+
+Elas ficaram de fora para manter o programa pequeno, correto e fácil de explicar no porte desta atividade.
+
+### Etapas do desenvolvimento (histórico de commits)
+
+As mensagens de commit indicam a etapa entre parênteses, por exemplo `feat(fase-2): ...`:
+
+| Etapa | O que foi construído |
+|-------|----------------------|
+| `fase-1` | Leitura validada, formatação de moeda, persistência em JSON, cadastro, consulta, listagem e menu principal |
+| `fase-2` | Entrada de itens, saída avulsa, histórico de movimentações e extrato |
+| `fase-3` | Carrinho e venda com vários itens, comprovante, relatórios e dados de exemplo |
+| `fase-4` | Documentação: README e explicação da solução |
+| `fix` / `refactor` | Correções e ajustes encontrados ao testar e revisar o programa (validação do arquivo, venda com produto repetido, acentuação no Git Bash, legibilidade) |
 
 ### Uso de ferramentas
 
