@@ -37,7 +37,7 @@ def executar_menu(produtos, vendas, movimentacoes):
         elif opcao == 4:
             alterou = telas.registrar_venda(produtos, vendas, movimentacoes)
         elif opcao == 7:
-            telas.opcao_em_construcao()
+            telas.menu_relatorios(produtos, vendas)
         elif opcao == 5:
             telas.consultar_saldo(produtos, movimentacoes)
         elif opcao == 6:

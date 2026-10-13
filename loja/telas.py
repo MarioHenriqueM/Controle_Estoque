@@ -12,6 +12,7 @@ from loja import caixa
 from loja import estoque
 from loja import formatacao
 from loja import leitura
+from loja import relatorios
 
 MAXIMO_CARACTERES_NOME = 30
 
@@ -33,10 +34,6 @@ def mostrar_menu():
     print("6 - Listar estoque")
     print("7 - Relatórios")
     print("0 - Sair")
-
-
-def opcao_em_construcao():
-    print("Esta opção ainda está em desenvolvimento.")
 
 
 def escolher_produto(produtos):
@@ -285,3 +282,106 @@ def listar_estoque(produtos):
         total_unidades = total_unidades + produto["saldo"]
     quantidade_produtos = len(produtos)
     print(f"{quantidade_produtos} produto(s), {total_unidades} unidade(s) em estoque.")
+
+
+def relatorio_faturamento(vendas):
+    """Relatório 1: soma das vendas, número de vendas e ticket médio."""
+    print()
+    print("--- Faturamento total ---")
+    quantidade_vendas = len(vendas)
+    if quantidade_vendas == 0:
+        print("Nenhuma venda registrada.")
+        return
+    total_centavos = relatorios.faturamento_total(vendas)
+    ticket_centavos = relatorios.ticket_medio_centavos(total_centavos, quantidade_vendas)
+    total = formatacao.formatar_moeda(total_centavos)
+    ticket = formatacao.formatar_moeda(ticket_centavos)
+    print(f"Vendas registradas: {quantidade_vendas}")
+    print(f"Faturamento total:  {total}")
+    print(f"Ticket médio:       {ticket}")
+    print("(Saídas avulsas não entram no faturamento.)")
+
+
+def relatorio_vendas_por_produto(produtos, vendas):
+    """Relatório 2: unidades e valor vendidos de cada produto."""
+    print()
+    print("--- Vendas por produto ---")
+    if len(vendas) == 0:
+        print("Nenhuma venda registrada.")
+        return
+    codigo = "Código"
+    nome = "Nome"
+    unidades = "Unidades"
+    valor = "Valor vendido"
+    titulo = f"{codigo:>6}  {nome:<30}  {unidades:>8}  {valor:>14}"
+    print(titulo)
+    print("-" * len(titulo))
+    resumo = relatorios.vendas_por_produto(produtos, vendas)
+    for linha in resumo:
+        codigo = linha["codigo"]
+        nome = linha["nome"]
+        unidades = linha["unidades"]
+        valor = formatacao.formatar_moeda(linha["valor_centavos"])
+        print(f"{codigo:>6}  {nome:<30}  {unidades:>8}  {valor:>14}")
+
+
+def relatorio_valor_estoque(produtos):
+    """Relatório 3: saldo x preço de cada produto e o total (a preço de venda)."""
+    print()
+    print("--- Valor do estoque (a preço de venda) ---")
+    if len(produtos) == 0:
+        print("Nenhum produto cadastrado.")
+        return
+    codigo = "Código"
+    nome = "Nome"
+    saldo = "Saldo"
+    valor = "Valor"
+    titulo = f"{codigo:>6}  {nome:<30}  {saldo:>7}  {valor:>14}"
+    print(titulo)
+    print("-" * len(titulo))
+    linhas, total_centavos = relatorios.valor_do_estoque(produtos)
+    for linha in linhas:
+        codigo = linha["codigo"]
+        nome = linha["nome"]
+        saldo = linha["saldo"]
+        valor = formatacao.formatar_moeda(linha["valor_centavos"])
+        print(f"{codigo:>6}  {nome:<30}  {saldo:>7}  {valor:>14}")
+    total = formatacao.formatar_moeda(total_centavos)
+    print(f"Valor total do estoque: {total}")
+
+
+def listar_vendas(vendas):
+    """Relatório 4: reimprime o comprovante de todas as vendas."""
+    print()
+    print("--- Todas as vendas ---")
+    if len(vendas) == 0:
+        print("Nenhuma venda registrada.")
+        return
+    for venda in vendas:
+        imprimir_comprovante(venda)
+
+
+def menu_relatorios(produtos, vendas):
+    """Opção 7: submenu de relatórios (só consulta; não altera o estado)."""
+    no_menu = True
+    while no_menu:
+        print()
+        print("--- Relatórios ---")
+        print("1 - Faturamento total")
+        print("2 - Vendas por produto")
+        print("3 - Valor do estoque")
+        print("4 - Todas as vendas (comprovantes)")
+        print("0 - Voltar ao menu principal")
+        opcao = leitura.ler_inteiro("Escolha um relatório: ", 0)
+        if opcao == 1:
+            relatorio_faturamento(vendas)
+        elif opcao == 2:
+            relatorio_vendas_por_produto(produtos, vendas)
+        elif opcao == 3:
+            relatorio_valor_estoque(produtos)
+        elif opcao == 4:
+            listar_vendas(vendas)
+        elif opcao == 0:
+            no_menu = False
+        else:
+            print("Opção inválida.")
