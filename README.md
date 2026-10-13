@@ -1,10 +1,9 @@
 # Sistema de Controle de Estoque e Vendas
 
-**Trabalho individual:** Mario Henrique
-**Disciplina:** Paradigmas de Programação, UNAMA. Prof. Rodrigo Medeiros Costa
-**Atividade:** Avaliativa AV1, resolução de problema com **paradigma imperativo** (Python)
-
- **Vídeo de demonstração:** _(link do vídeo aqui)_
+- **Trabalho em dupla:** Mario Henrique Martins dos Santos e Paulo Renan Santana de Almeida
+- **Disciplina:** Paradigmas de Programação, UNAMA. Prof. Rodrigo Medeiros Costa
+- **Atividade:** Avaliativa AV1, resolução de problema com **paradigma imperativo** (Python)
+- **Vídeo de demonstração:** _(link do vídeo aqui)_
 
 Programa de terminal que controla o estoque e as vendas de um pequeno comércio. Ele permite cadastrar produtos, registrar entradas e saídas de itens, consultar saldos, registrar vendas com vários itens e calcular os valores vendidos. Foi escrito no paradigma **imperativo/procedural**: o programa é uma sequência de instruções que alteram o estado dos dados (variáveis, listas e dicionários) usando atribuições, decisões (`if/elif/else`), repetições (`while`/`for`) e funções. Não usa classes nem recursos de outros paradigmas.
 
@@ -16,7 +15,7 @@ Programa de terminal que controla o estoque e as vendas de um pequeno comércio.
 4. [Estrutura do projeto](#4-estrutura-do-projeto)
 5. [Explicação da solução](#5-explicação-da-solução)
 6. [Reflexão sobre o desenvolvimento](#6-reflexão-sobre-o-desenvolvimento)
-7. [Integrante](#7-integrante)
+7. [Integrantes](#7-integrantes)
 
 ---
 
@@ -143,7 +142,7 @@ O estado do programa são **três listas** criadas no `main.py` e passadas como 
 
 ## 5. Explicação da solução
 
- **Explicação completa, com trechos do código e teste de mesa: [docs/EXPLICACAO.md](docs/EXPLICACAO.md)**
+**Explicação completa, com trechos do código e teste de mesa: [docs/EXPLICACAO.md](docs/EXPLICACAO.md)**
 
 Resumo da lógica: o `main.py` carrega o estado (três listas: `produtos`, `vendas`, `movimentacoes`) e repete o menu até o usuário sair. Cada opção chama uma tela, que lê os dados, chama a regra correspondente e mostra o resultado. Depois de cada operação que altera o estado, os dados são salvos.
 
@@ -171,9 +170,9 @@ A explicação completa também cobre:
 
 ### Principais decisões
 
-Cada decisão aparece no formato **o que escolhi** (em vez do quê) e o motivo.
+Cada decisão aparece no formato **o que escolhemos** (em vez do quê) e o motivo.
 
-- **Python em estilo procedural** (em vez de C): o Python já estava instalado e deixa o código mais legível. Mantive só construções imperativas, sem classes, `lambda`, *comprehensions* ou `map`/`filter`.
+- **Python em estilo procedural** (em vez de C): o Python já estava instalado e deixa o código mais legível. Mantivemos só construções imperativas, sem classes, `lambda`, *comprehensions* ou `map`/`filter`.
 - **Centavos inteiros** (em vez de `float`): `int(0.29 * 100)` dá `28`, e não `29`. Com inteiros, somas e multiplicações são exatas.
 - **Estado em três listas passadas por parâmetro** (em vez de variáveis globais): a assinatura mostra o que cada função altera, e os testes usam listas próprias.
 - **Regras separadas das telas** (em vez de `input`/`print` dentro das regras): `cadastro`, `estoque`, `caixa` e `relatorios` podem ser testados automaticamente.
@@ -184,11 +183,11 @@ Cada decisão aparece no formato **o que escolhi** (em vez do quê) e o motivo.
 ### Dificuldades encontradas
 
 - **Ler preços com vírgula sem usar `float`.** A solução foi separar reais e centavos pelo texto e validar cada parte (`texto_para_centavos`). Os testes "0,29 sem erro de float" e "três casas é inválido" provam o resultado.
-- **Produto repetido no carrinho.** Adicionar o mesmo produto duas vezes podia ultrapassar o saldo. Passei a somar no mesmo item e a calcular o *disponível* como saldo menos o que já está no carrinho. Na revisão final, a confirmação da venda também passou a conferir o **total** de cada produto, garantindo o tudo-ou-nada (teste "produto repetido acima do saldo é recusado").
+- **Produto repetido no carrinho.** Adicionar o mesmo produto duas vezes podia ultrapassar o saldo. Passamos a somar no mesmo item e a calcular o *disponível* como saldo menos o que já está no carrinho. Na revisão final, a confirmação da venda também passou a conferir o **total** de cada produto, garantindo o tudo-ou-nada (teste "produto repetido acima do saldo é recusado").
 - **Nomes de módulos × nomes de variáveis.** Um módulo `vendas.py` entraria em conflito com a lista `vendas` recebida como parâmetro. Por isso os módulos se chamam `caixa`, `cadastro` e `estoque`.
-- **Acentuação no Windows.** Todo `open()` informa a codificação de forma explícita: `"utf-8"` na gravação e `"utf-8-sig"` na leitura, que também aceita arquivos salvos com BOM (como os do Bloco de Notas). Na revisão final, descobri que no Git Bash o menu saía com caracteres trocados e um nome digitado como "Lápis" era gravado como "LÃ¡pis". O `main` passou a configurar UTF-8 na entrada e na saída (`configurar_acentos`).
-- **Ordem das perguntas.** No primeiro teste da saída avulsa, o motivo era pedido antes de conferir o saldo: o usuário escolhia o motivo e só depois era recusado. Ajustei para conferir o saldo logo depois da quantidade. A correção entrou no mesmo commit da tela.
-- **Manter o estilo imperativo.** Foi preciso disciplina para não usar atalhos como *comprehensions* e para cuidar do aliasing das listas passadas por parâmetro. Na revisão, percebi que a venda guardava a mesma lista do carrinho, e ela passou a guardar cópias dos itens.
+- **Acentuação no Windows.** Todo `open()` informa a codificação de forma explícita: `"utf-8"` na gravação e `"utf-8-sig"` na leitura, que também aceita arquivos salvos com BOM (como os do Bloco de Notas). Na revisão final, descobrimos que no Git Bash o menu saía com caracteres trocados e um nome digitado como "Lápis" era gravado como "LÃ¡pis". O `main` passou a configurar UTF-8 na entrada e na saída (`configurar_acentos`).
+- **Ordem das perguntas.** No primeiro teste da saída avulsa, o motivo era pedido antes de conferir o saldo: o usuário escolhia o motivo e só depois era recusado. Ajustamos para conferir o saldo logo depois da quantidade. A correção entrou no mesmo commit da tela.
+- **Manter o estilo imperativo.** Foi preciso disciplina para não usar atalhos como *comprehensions* e para cuidar do aliasing das listas passadas por parâmetro. Na revisão, percebemos que a venda guardava a mesma lista do carrinho, e ela passou a guardar cópias dos itens.
 - **Arquivo de dados editado à mão.** Um JSON válido, mas sem as chaves ou com os tipos errados (um produto sem `"nome"`, ou um preço como texto), derrubava o programa. Agora a estrutura é validada ao carregar (`persistencia.estrutura_valida`), e o arquivo inválido é guardado como cópia `.corrompido` (testes "estrutura errada começa vazio" e "preço como texto é inválido").
 
 ### Possíveis melhorias
@@ -203,6 +202,7 @@ Cada decisão aparece no formato **o que escolhi** (em vez do quê) e o motivo.
 
 - Buscar produtos por parte do nome.
 - Destacar o produto mais vendido e gerar relatórios por período (data inicial e final).
+- Quando o arquivo de dados estiver bloqueado por outro programa, oferecer uma nova tentativa em vez de encerrar.
 - Interface gráfica ou banco de dados, para um uso real com mais dados.
 
 Elas ficaram de fora para manter o programa pequeno, correto e fácil de explicar no porte desta atividade.
@@ -221,10 +221,13 @@ As mensagens de commit indicam a etapa entre parênteses, por exemplo `feat(fase
 
 ### Uso de ferramentas
 
-Usei um assistente de IA (Claude) como apoio no planejamento, na pesquisa de boas práticas e na escrita do código e da documentação. Revisei, executei e testei o programa, e estudei cada parte para conseguir explicá-la.
+Usamos um assistente de IA (Claude) como apoio no planejamento, na pesquisa de boas práticas e na escrita do código e da documentação. Revisamos, executamos e testamos o programa, e estudamos cada parte para conseguir explicá-la.
 
-## 7. Integrante
+## 7. Integrantes
 
-| Nome | Participação |
-|------|--------------|
-| Mario Henrique | Trabalho individual: análise do problema, implementação, testes e documentação |
+| Integrante | Participação |
+|------------|--------------|
+| Mario Henrique Martins dos Santos | Implementação do programa (`main.py` e pacote `loja/`) e testes automatizados (`testes.py`) |
+| Paulo Renan Santana de Almeida | Documentação: descrição do problema, explicação da solução ([docs/EXPLICACAO.md](docs/EXPLICACAO.md)), reflexão, roteiro e gravação do vídeo de demonstração |
+
+**Versionamento:** todos os commits do repositório foram feitos pela conta do GitHub de Mario Henrique, que também integrou ao repositório a documentação produzida por Paulo Renan.
