@@ -3,7 +3,7 @@
 - **Trabalho em dupla:** Mario Henrique Martins dos Santos e Paulo Renan Santana de Almeida
 - **Disciplina:** Paradigmas de Programação, UNAMA. Prof. Rodrigo Medeiros Costa
 - **Atividade:** Avaliativa AV1, resolução de problema com **paradigma imperativo** (Python)
-- **Vídeo de demonstração:** _(link do vídeo aqui)_
+- **Vídeo de demonstração:** https://youtu.be/CQVp28-3Be4
 
 Programa de terminal que controla o estoque e as vendas de um pequeno comércio. Ele permite cadastrar produtos, registrar entradas e saídas de itens, consultar saldos, registrar vendas com vários itens e calcular os valores vendidos. Foi escrito no paradigma **imperativo/procedural**: o programa é uma sequência de instruções que alteram o estado dos dados (variáveis, listas e dicionários) usando atribuições, decisões (`if/elif/else`), repetições (`while`/`for`) e funções. Não usa classes nem recursos de outros paradigmas.
 
