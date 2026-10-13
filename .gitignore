@@ -1,0 +1,16 @@
+# Ferramentas de planejamento (fora do repositório de entrega)
+.planning/
+.claude/
+CLAUDE.md
+
+# Enunciado do professor (material de referência local)
+regras_trabalho/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Sistema
+.DS_Store
+Thumbs.db
