@@ -136,7 +136,21 @@ O estado do programa são **três listas** criadas no `main.py` e passadas como 
 
 ## 5. Explicação da solução
 
-_(em preparação)_
+📄 **Explicação completa, com trechos do código e teste de mesa: [docs/EXPLICACAO.md](docs/EXPLICACAO.md)**
+
+Resumo da lógica: o `main.py` carrega o estado (três listas: `produtos`, `vendas`, `movimentacoes`) e repete o menu até o usuário sair. Cada opção chama uma tela, que lê os dados, chama a regra correspondente e mostra o resultado. Depois de cada operação que altera o estado, os dados são salvos.
+
+Onde estão os elementos do paradigma imperativo:
+
+| Elemento | Exemplo no código |
+|----------|-------------------|
+| Sequência de instruções | `formatacao.formatar_moeda`: calcula reais e centavos passo a passo. `main.main`: carregar → avisar → executar o menu |
+| Alteração de estado (variáveis e atribuições) | `estoque.registrar_entrada`: `produto["saldo"] = produto["saldo"] + quantidade`. Acumulador `total_centavos` em `caixa.calcular_total`. `executando = False` no menu |
+| Decisões | `if/elif/else` do menu em `main.executar_menu`. `if not tem_saldo_suficiente(...)` em `estoque.registrar_saida`. Validações em `leitura.ler_inteiro` |
+| Repetições | `while executando:` (menu), `while not valido:` (leituras), `for` com acumuladores e laços aninhados em `relatorios.vendas_por_produto` |
+| Funções e procedimentos | Funções que devolvem valores (`calcular_total`, `buscar_produto`, `formatar_moeda`) e procedimentos que alteram as listas recebidas (`registrar_entrada`, `efetivar_venda`) |
+
+A venda é feita em **duas passadas** (`caixa.efetivar_venda`): primeiro confere o saldo de todos os itens, depois baixa o estoque. Assim, ou a venda acontece inteira, ou nada muda.
 
 ## 6. Reflexão sobre o desenvolvimento
 
@@ -157,6 +171,7 @@ _(em preparação)_
 - **Nomes de módulos x nomes de variáveis:** um módulo chamado `vendas.py` entraria em conflito com a lista `vendas` recebida como parâmetro. Por isso os módulos se chamam `caixa`, `cadastro` e `estoque`.
 - **Acentuação no Windows:** ao testar o programa redirecionando a entrada e a saída, os acentos saíam errados. Todo `open()` passou a usar `encoding="utf-8"`.
 - **Ordem das perguntas:** na saída avulsa, o motivo era pedido antes de conferir o saldo. Inverti para recusar logo uma quantidade maior que o saldo.
+- **Arquivo de dados editado à mão:** na revisão final, um JSON válido mas sem as chaves esperadas (por exemplo, um produto sem `"nome"`) derrubava o programa. Passei a validar a estrutura ao carregar (`persistencia.estrutura_valida`), e o arquivo inválido é guardado como cópia `.corrompido`.
 
 ### Possíveis melhorias
 
@@ -165,6 +180,7 @@ _(em preparação)_
 - Estoque mínimo com alerta de reposição.
 - Destacar o produto mais vendido e gerar relatórios por período (data inicial e final).
 - Cancelar ou estornar uma venda, devolvendo os itens ao estoque.
+- Tratar o caso de o arquivo de dados estar aberto ou bloqueado por outro programa no momento em que o sistema inicia.
 - Interface gráfica ou banco de dados, para um uso real com mais dados.
 
 ### Uso de ferramentas
