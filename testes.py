@@ -11,6 +11,7 @@ import sys
 import tempfile
 
 from loja import cadastro
+from loja import estoque
 from loja import formatacao
 from loja import leitura
 from loja import persistencia
@@ -77,6 +78,34 @@ def testar_cadastro():
     return falhas
 
 
+def testar_estoque():
+    falhas = 0
+    data = "13/10/2026 10:00"
+    produto = cadastro.criar_produto(1, "Caneta", 250, 10)
+    movimentacoes = []
+
+    estoque.registrar_entrada(produto, 5, movimentacoes, data, estoque.MOTIVO_COMPRA)
+    falhas = falhas + verificar("entrada aumenta o saldo (10 -> 15)", produto["saldo"], 15)
+    falhas = falhas + verificar("entrada gera 1 movimentação", len(movimentacoes), 1)
+    falhas = falhas + verificar("movimentação guarda o saldo após", movimentacoes[0]["saldo_apos"], 15)
+
+    baixou = estoque.registrar_saida(produto, 3, movimentacoes, data, estoque.TIPO_SAIDA, "perda")
+    falhas = falhas + verificar("saída com saldo suficiente é aceita", baixou, True)
+    falhas = falhas + verificar("saída diminui o saldo (15 -> 12)", produto["saldo"], 12)
+    falhas = falhas + verificar("saída registra o tipo SAIDA", movimentacoes[1]["tipo"], "SAIDA")
+
+    baixou = estoque.registrar_saida(produto, 50, movimentacoes, data, estoque.TIPO_SAIDA, "avaria")
+    falhas = falhas + verificar("saída maior que o saldo é recusada", baixou, False)
+    falhas = falhas + verificar("saída recusada não altera o saldo", produto["saldo"], 12)
+    falhas = falhas + verificar("saída recusada não gera movimentação", len(movimentacoes), 2)
+
+    outro = cadastro.criar_produto(2, "Lápis", 150, 0)
+    estoque.registrar_entrada(outro, 4, movimentacoes, data, estoque.MOTIVO_COMPRA)
+    extrato = estoque.extrato_do_produto(movimentacoes, 1)
+    falhas = falhas + verificar("extrato só traz o produto pedido", len(extrato), 2)
+    return falhas
+
+
 def testar_persistencia():
     falhas = 0
     pasta = tempfile.mkdtemp()
@@ -120,6 +149,7 @@ def main():
     total_falhas = total_falhas + testar_texto_para_centavos()
     total_falhas = total_falhas + testar_formatar_moeda()
     total_falhas = total_falhas + testar_cadastro()
+    total_falhas = total_falhas + testar_estoque()
     total_falhas = total_falhas + testar_persistencia()
     print()
     if total_falhas > 0:
