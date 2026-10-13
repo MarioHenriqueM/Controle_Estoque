@@ -63,6 +63,28 @@ def testar_formatar_moeda():
     return falhas
 
 
+def testar_cores():
+    falhas = 0
+    ambiente_wt = {"WT_SESSION": "1"}
+    falhas = falhas + verificar("Windows Terminal interativo tem cores",
+                                formatacao.suporta_cores(True, "nt", ambiente_wt), True)
+    falhas = falhas + verificar("cmd antigo do Windows não tem cores",
+                                formatacao.suporta_cores(True, "nt", {}), False)
+    falhas = falhas + verificar("terminal do VS Code tem cores",
+                                formatacao.suporta_cores(True, "nt", {"TERM_PROGRAM": "vscode"}), True)
+    falhas = falhas + verificar("Linux/macOS interativo tem cores",
+                                formatacao.suporta_cores(True, "posix", {}), True)
+    falhas = falhas + verificar("saída redirecionada (pipe) não tem cores",
+                                formatacao.suporta_cores(False, "posix", {}), False)
+    falhas = falhas + verificar("NO_COLOR desliga as cores",
+                                formatacao.suporta_cores(True, "posix", {"NO_COLOR": "1"}), False)
+    falhas = falhas + verificar("cor desligada devolve o texto sem mudança",
+                                formatacao.aplicar_cor("ok", formatacao.VERDE, False), "ok")
+    falhas = falhas + verificar("cor ligada envolve o texto com os códigos ANSI",
+                                formatacao.aplicar_cor("ok", formatacao.VERDE, True), "\033[32mok\033[0m")
+    return falhas
+
+
 def testar_cadastro():
     falhas = 0
     produtos = []
@@ -293,6 +315,7 @@ def main():
     total_falhas = total_falhas + testar_texto_para_inteiro()
     total_falhas = total_falhas + testar_texto_para_centavos()
     total_falhas = total_falhas + testar_formatar_moeda()
+    total_falhas = total_falhas + testar_cores()
     total_falhas = total_falhas + testar_cadastro()
     total_falhas = total_falhas + testar_estoque()
     total_falhas = total_falhas + testar_carrinho()

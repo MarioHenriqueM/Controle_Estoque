@@ -1,10 +1,81 @@
 """Transforma números e registros em texto para mostrar na tela.
 
-Funções puras: recebem valores e DEVOLVEM uma string (não chamam print()).
-Dinheiro chega sempre em centavos (int).
+As funções DEVOLVEM uma string (não chamam print()). Dinheiro chega sempre em
+centavos (int). As cores só são usadas quando o terminal é interativo e entende
+os códigos de cor ANSI; nos outros casos, o texto sai sem mudança.
 """
 
+import os
+import sys
+
 from loja import estoque
+
+# Códigos ANSI: escritos antes do texto, mudam a cor; NORMAL volta ao padrão
+VERDE = "\033[32m"
+VERMELHO = "\033[31m"
+AMARELO = "\033[33m"
+CIANO_NEGRITO = "\033[1;36m"
+NEGRITO = "\033[1m"
+NORMAL = "\033[0m"
+LIMPAR_TELA = "\033[2J\033[H"
+
+
+def suporta_cores(interativo, nome_sistema, ambiente):
+    """Decide se o terminal mostra cores. Recebe tudo por parâmetro, para ser testável.
+    Fora do Windows, todo terminal interativo aceita cores. No Windows, só o
+    Windows Terminal e o terminal do VS Code (o cmd antigo mostraria lixo)."""
+    if not interativo or "NO_COLOR" in ambiente:
+        return False
+    if nome_sistema != "nt":
+        return True
+    if "WT_SESSION" in ambiente or ambiente.get("TERM_PROGRAM") == "vscode":
+        return True
+    return False
+
+
+# Constantes calculadas uma única vez, quando o módulo é carregado (nunca mudam depois)
+TERMINAL_INTERATIVO = sys.stdin.isatty() and sys.stdout.isatty()
+CORES_ATIVAS = suporta_cores(TERMINAL_INTERATIVO, os.name, os.environ)
+
+
+def aplicar_cor(texto, codigo, ativo):
+    """Devolve o texto entre o código de cor e o código NORMAL.
+    Se 'ativo' for False, devolve o texto sem mudança."""
+    if not ativo:
+        return texto
+    return codigo + texto + NORMAL
+
+
+def sucesso(texto):
+    """Texto em verde (operação realizada)."""
+    return aplicar_cor(texto, VERDE, CORES_ATIVAS)
+
+
+def erro(texto):
+    """Texto em vermelho (entrada inválida ou operação recusada)."""
+    return aplicar_cor(texto, VERMELHO, CORES_ATIVAS)
+
+
+def aviso(texto):
+    """Texto em amarelo (informação importante, sem erro)."""
+    return aplicar_cor(texto, AMARELO, CORES_ATIVAS)
+
+
+def titulo(texto):
+    """Texto em ciano e negrito (títulos e cabeçalhos)."""
+    return aplicar_cor(texto, CIANO_NEGRITO, CORES_ATIVAS)
+
+
+def destaque(texto):
+    """Texto em negrito (totais)."""
+    return aplicar_cor(texto, NEGRITO, CORES_ATIVAS)
+
+
+def codigo_limpar_tela():
+    """Devolve o código que limpa a tela, ou texto vazio se o terminal não o entende."""
+    if CORES_ATIVAS:
+        return LIMPAR_TELA
+    return ""
 
 
 def formatar_moeda(centavos):
