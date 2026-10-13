@@ -8,6 +8,7 @@ devolvem True, para que o main.py saiba que precisa salvar os dados.
 import datetime
 
 from loja import cadastro
+from loja import caixa
 from loja import estoque
 from loja import formatacao
 from loja import leitura
@@ -136,6 +137,117 @@ def registrar_saida(produtos, movimentacoes):
     nome = produto["nome"]
     saldo_depois = produto["saldo"]
     print(f"Saída registrada ({motivo}). Saldo de {nome}: {saldo_antes} -> {saldo_depois}")
+    return True
+
+
+def mostrar_carrinho(carrinho):
+    """Mostra os itens do carrinho com subtotais e o total."""
+    if len(carrinho) == 0:
+        print("Carrinho vazio.")
+        return
+    print("Carrinho:")
+    for item in carrinho:
+        print(formatacao.linha_item(item))
+    total = formatacao.formatar_moeda(caixa.calcular_total(carrinho))
+    print(f"Total da venda: {total}")
+
+
+def adicionar_item(produtos, carrinho):
+    """Pede produto e quantidade e coloca no carrinho, respeitando o saldo disponível
+    (saldo do produto menos o que já está no carrinho)."""
+    produto = escolher_produto(produtos)
+    if produto is None:
+        return
+    no_carrinho = caixa.quantidade_no_carrinho(carrinho, produto["codigo"])
+    disponivel = produto["saldo"] - no_carrinho
+    if disponivel <= 0:
+        print("Sem saldo disponível para este produto.")
+        return
+    quantidade = leitura.ler_inteiro("Quantidade: ", 1)
+    if quantidade > disponivel:
+        print(f"Quantidade indisponível: há {disponivel} unidade(s) livre(s) deste produto.")
+        return
+    caixa.adicionar_ao_carrinho(carrinho, produto, quantidade)
+    print("Item adicionado ao carrinho.")
+
+
+def remover_item(carrinho):
+    """Pede o código e tira o item do carrinho."""
+    if len(carrinho) == 0:
+        print("O carrinho está vazio.")
+        return
+    codigo = leitura.ler_inteiro("Código do produto a remover: ", 1)
+    removeu = caixa.remover_do_carrinho(carrinho, codigo)
+    if removeu:
+        print("Item removido do carrinho.")
+    else:
+        print("Esse produto não está no carrinho.")
+
+
+def imprimir_comprovante(venda):
+    """Mostra o comprovante de uma venda registrada."""
+    numero = venda["numero"]
+    data = venda["data"]
+    total = formatacao.formatar_moeda(venda["total_centavos"])
+    print()
+    print("=============== COMPROVANTE DE VENDA ===============")
+    print(f"Venda {numero} - {data}")
+    for item in venda["itens"]:
+        print(formatacao.linha_item(item))
+    print(f"TOTAL: {total}")
+    print("====================================================")
+
+
+def registrar_venda(produtos, vendas, movimentacoes):
+    """Opção 4: venda com vários itens. Monta o carrinho, confirma e efetiva.
+    Retorna: True se a venda foi registrada (o estado foi alterado)."""
+    print()
+    print("--- Nova venda ---")
+    if len(produtos) == 0:
+        print("Nenhum produto cadastrado.")
+        return False
+    carrinho = []                     # lista nova a cada venda (nunca reaproveitada)
+    montando = True
+    while montando:
+        print()
+        print("1 - Adicionar item | 2 - Remover item | 3 - Finalizar venda | 0 - Cancelar venda")
+        opcao = leitura.ler_inteiro("Escolha: ", 0)
+        if opcao == 1:
+            adicionar_item(produtos, carrinho)
+            mostrar_carrinho(carrinho)
+        elif opcao == 2:
+            remover_item(carrinho)
+            mostrar_carrinho(carrinho)
+        elif opcao == 3:
+            if len(carrinho) == 0:
+                print("Adicione pelo menos um item antes de finalizar.")
+            else:
+                montando = False
+        elif opcao == 0:
+            print("Venda cancelada. Nada foi alterado.")
+            return False
+        else:
+            print("Opção inválida.")
+
+    print()
+    mostrar_carrinho(carrinho)
+    if not leitura.ler_confirmacao("Confirmar a venda? (s/n): "):
+        print("Venda cancelada. Nada foi alterado.")
+        return False
+    vendas_antes = len(vendas)
+    venda = caixa.efetivar_venda(produtos, vendas, movimentacoes, carrinho, data_hora_atual())
+    if venda is None:
+        print("Algum item ficou sem saldo. Venda não realizada; nada foi alterado.")
+        return False
+    vendas_depois = len(vendas)
+    imprimir_comprovante(venda)
+    print(f"Vendas registradas: {vendas_antes} -> {vendas_depois}")
+    for item in venda["itens"]:
+        produto = cadastro.buscar_produto(produtos, item["codigo"])
+        nome = produto["nome"]
+        saldo_depois = produto["saldo"]
+        saldo_antes = saldo_depois + item["quantidade"]
+        print(f"Saldo de {nome}: {saldo_antes} -> {saldo_depois}")
     return True
 
 

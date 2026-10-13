@@ -60,3 +60,13 @@ def linha_extrato(movimentacao):
     else:
         quantidade = "-" + str(movimentacao["quantidade"])
     return f"{data:<16}  {tipo:<8}  {quantidade:>7}  {motivo:<14}  {saldo:>10}"
+
+
+def linha_item(item):
+    """Devolve a linha de um item de venda: quantidade x nome, preço unitário e subtotal."""
+    codigo = item["codigo"]
+    quantidade = item["quantidade"]
+    nome = item["nome"]
+    preco = formatar_moeda(item["preco_unitario_centavos"])
+    subtotal = formatar_moeda(item["subtotal_centavos"])
+    return f"{codigo:>6}  {quantidade:>5} x {nome:<30}  {preco:>14}  {subtotal:>14}"

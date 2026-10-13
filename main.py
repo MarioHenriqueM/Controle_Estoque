@@ -34,7 +34,9 @@ def executar_menu(produtos, vendas, movimentacoes):
             alterou = telas.registrar_entrada(produtos, movimentacoes)
         elif opcao == 3:
             alterou = telas.registrar_saida(produtos, movimentacoes)
-        elif opcao == 4 or opcao == 7:
+        elif opcao == 4:
+            alterou = telas.registrar_venda(produtos, vendas, movimentacoes)
+        elif opcao == 7:
             telas.opcao_em_construcao()
         elif opcao == 5:
             telas.consultar_saldo(produtos, movimentacoes)
