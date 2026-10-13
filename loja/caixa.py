@@ -37,7 +37,8 @@ def adicionar_ao_carrinho(carrinho, produto, quantidade):
     for item in carrinho:
         if item["codigo"] == produto["codigo"]:
             item["quantidade"] = item["quantidade"] + quantidade
-            item["subtotal_centavos"] = calcular_subtotal(item["quantidade"], item["preco_unitario_centavos"])
+            item["subtotal_centavos"] = calcular_subtotal(item["quantidade"],
+                                                          item["preco_unitario_centavos"])
             return
     novo_item = {
         "codigo": produto["codigo"],

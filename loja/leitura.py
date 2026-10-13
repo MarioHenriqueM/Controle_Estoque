@@ -68,7 +68,8 @@ def ler_preco_centavos(mensagem):
         texto = input(mensagem)
         centavos = texto_para_centavos(texto)
         if centavos <= 0:
-            print("Preço inválido. Use o formato 12,50 (de R$ 0,01 a R$ 999.999,99, sem separador de milhar).")
+            print("Preço inválido. Use o formato 12,50 "
+                  + "(de R$ 0,01 a R$ 999.999,99, sem separador de milhar).")
     return centavos
 
 

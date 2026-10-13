@@ -116,7 +116,8 @@ def salvar_dados(caminho, produtos, vendas, movimentacoes):
     texto = json.dumps(dados, ensure_ascii=False, indent=2)   # 1. monta o texto na memória
     temporario = caminho + ".tmp"                              # 2. grava num arquivo temporário
     try:
-        os.makedirs(os.path.dirname(caminho), exist_ok=True)  # num clone novo, dados/ pode não existir
+        # num clone novo do repositório, a pasta dados/ pode ainda não existir
+        os.makedirs(os.path.dirname(caminho), exist_ok=True)
         with open(temporario, "w", encoding="utf-8") as arquivo:
             arquivo.write(texto)
         os.replace(temporario, caminho)                        # 3. troca o arquivo de uma vez

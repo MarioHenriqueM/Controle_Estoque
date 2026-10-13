@@ -12,7 +12,7 @@ TIPO_SAIDA = "SAIDA"
 TIPO_VENDA = "VENDA"
 MOTIVO_COMPRA = "compra"
 MOTIVO_SALDO_INICIAL = "saldo inicial"
-MOTIVOS_SAIDA = ["perda", "avaria", "uso interno"]
+MOTIVOS_SAIDA = ("perda", "avaria", "uso interno")    # tupla: constante que não muda
 
 
 def criar_movimentacao(data, tipo, produto, quantidade, motivo):

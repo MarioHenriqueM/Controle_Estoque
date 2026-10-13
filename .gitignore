@@ -18,4 +18,4 @@ Thumbs.db
 # Dados gerados pelo programa (o exemplo dados/exemplo.json é versionado)
 dados/loja.json
 *.tmp
-*.corrompido
+*.corrompido*
