@@ -75,8 +75,8 @@ Na primeira execução, o programa carrega `dados/exemplo.json` (papelaria com 5
 **Requisitos:** Python **3.10 ou superior** (desenvolvido e testado no 3.12). Não há bibliotecas para instalar: só a biblioteca padrão.
 
 ```bash
-git clone <URL deste repositório>
-cd <pasta do repositório>
+git clone https://github.com/MarioHenriqueM/Controle_Estoque.git
+cd Controle_Estoque
 python main.py
 ```
 
