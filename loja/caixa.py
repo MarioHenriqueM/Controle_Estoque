@@ -52,8 +52,8 @@ def remover_do_carrinho(carrinho, codigo):
     """Altera: carrinho (tira o item do produto informado).
     Retorna: True se removeu; False se o produto não estava no carrinho."""
     posicao = 0
-    for item in carrinho:
-        if item["codigo"] == codigo:
+    while posicao < len(carrinho):
+        if carrinho[posicao]["codigo"] == codigo:
             carrinho.pop(posicao)
             return True
         posicao = posicao + 1

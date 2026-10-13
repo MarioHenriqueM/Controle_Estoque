@@ -36,12 +36,12 @@ def executar_menu(produtos, vendas, movimentacoes):
             alterou = telas.registrar_saida(produtos, movimentacoes)
         elif opcao == 4:
             alterou = telas.registrar_venda(produtos, vendas, movimentacoes)
-        elif opcao == 7:
-            telas.menu_relatorios(produtos, vendas)
         elif opcao == 5:
             telas.consultar_saldo(produtos, movimentacoes)
         elif opcao == 6:
             telas.listar_estoque(produtos)
+        elif opcao == 7:
+            telas.menu_relatorios(produtos, vendas)
         elif opcao == 0:
             executando = False
         else:
@@ -66,9 +66,9 @@ def main():
         executar_menu(produtos, vendas, movimentacoes)
     except (EOFError, KeyboardInterrupt):
         # Ctrl+C ou fim da entrada: encerra sem mensagem de erro e SEM salvar,
-        # porque cada operação concluída já foi salva.
+        # porque cada operação concluída já foi salva logo depois de acontecer.
         print()
-        print("Programa encerrado. As operações concluídas já estavam salvas.")
+        print("Programa encerrado. As operações salvas até aqui continuam no arquivo de dados.")
 
 
 if __name__ == "__main__":

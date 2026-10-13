@@ -128,7 +128,7 @@ def registrar_saida(produtos, movimentacoes):
     motivo = escolher_motivo_saida()
     registrou = estoque.registrar_saida(produto, quantidade, movimentacoes,
                                         data_hora_atual(), estoque.TIPO_SAIDA, motivo)
-    if not registrou:
+    if not registrou:                 # defesa: a regra também recusa saída sem saldo
         print(f"Saldo insuficiente (há {saldo_antes} unidade(s)). Nada foi alterado.")
         return False
     nome = produto["nome"]

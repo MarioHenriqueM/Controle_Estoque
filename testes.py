@@ -186,7 +186,7 @@ def testar_relatorios():
     faturamento = relatorios.faturamento_total(vendas)
     falhas = falhas + verificar("faturamento de 2 vendas (69,97 + 5,00)", faturamento, 7497)
     falhas = falhas + verificar("ticket médio (7497 / 2 = 3748,5 -> 3749)", relatorios.ticket_medio_centavos(faturamento, 2), 3749)
-    falhas = falhas + verificar("ticket médio 1000 / 3 arredonda para baixo", relatorios.ticket_medio_centavos(1000, 3), 333)
+    falhas = falhas + verificar("ticket médio 1000 / 3 = 333,33 -> 333 (mais próximo)", relatorios.ticket_medio_centavos(1000, 3), 333)
 
     resumo = relatorios.vendas_por_produto(produtos, vendas)
     falhas = falhas + verificar("resumo inclui todos os produtos", len(resumo), 3)

@@ -19,6 +19,8 @@ def ticket_medio_centavos(faturamento_centavos, quantidade_vendas):
     Devolve 0 quando não há vendas (evita divisão por zero)."""
     if quantidade_vendas == 0:
         return 0
+    # Somar metade do divisor antes da divisão inteira arredonda para o centavo
+    # mais próximo. Ex.: 7497 / 2 = 3748,5 -> (7497 + 1) // 2 = 3749.
     return (faturamento_centavos + quantidade_vendas // 2) // quantidade_vendas
 
 
