@@ -23,11 +23,12 @@ def calcular_total(itens):
 
 
 def quantidade_no_carrinho(carrinho, codigo):
-    """Devolve quantas unidades do produto já estão no carrinho (0 se nenhuma)."""
+    """Soma quantas unidades do produto já estão no carrinho (0 se nenhuma)."""
+    quantidade = 0
     for item in carrinho:
         if item["codigo"] == codigo:
-            return item["quantidade"]
-    return 0
+            quantidade = quantidade + item["quantidade"]
+    return quantidade
 
 
 def adicionar_ao_carrinho(carrinho, produto, quantidade):
@@ -66,17 +67,30 @@ def efetivar_venda(produtos, vendas, movimentacoes, carrinho, data):
     Retorna: o registro da venda, ou None (sem alterar nada) se algum item não tiver saldo."""
     if len(carrinho) == 0:
         return None
-    # 1ª passada: só confere; nenhuma alteração no estado
+    # 1ª passada: só confere; nenhuma alteração no estado.
+    # Compara o saldo com o TOTAL do produto no carrinho (soma de todos os itens dele).
     for item in carrinho:
         produto = cadastro.buscar_produto(produtos, item["codigo"])
-        if produto is None or not estoque.tem_saldo_suficiente(produto, item["quantidade"]):
+        quantidade_total = quantidade_no_carrinho(carrinho, item["codigo"])
+        if produto is None or not estoque.tem_saldo_suficiente(produto, quantidade_total):
             return None
-    # 2ª passada: agora sim baixa o estoque de cada item
+    # 2ª passada: agora sim baixa o estoque de cada item.
+    # Não falha: a 1ª passada já conferiu o total de cada produto e nada mudou desde então.
     numero = len(vendas) + 1
     for item in carrinho:
         produto = cadastro.buscar_produto(produtos, item["codigo"])
         estoque.registrar_saida(produto, item["quantidade"], movimentacoes, data,
                                 estoque.TIPO_VENDA, "venda " + str(numero))
-    venda = {"numero": numero, "data": data, "itens": carrinho, "total_centavos": calcular_total(carrinho)}
+    # A venda guarda CÓPIAS dos itens: depois de registrada, ela não muda
+    # mesmo que a lista carrinho (ou um item dela) seja alterada.
+    itens = []
+    for item in carrinho:
+        itens.append(item.copy())
+    venda = {
+        "numero": numero,
+        "data": data,
+        "itens": itens,
+        "total_centavos": calcular_total(itens),
+    }
     vendas.append(venda)
     return venda

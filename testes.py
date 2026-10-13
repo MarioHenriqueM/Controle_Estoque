@@ -147,6 +147,9 @@ def testar_venda():
     falhas = falhas + verificar("saldo da caneta baixou (4 -> 2)", produtos[1]["saldo"], 2)
     falhas = falhas + verificar("uma movimentação VENDA por item", len(movimentacoes), 2)
     falhas = falhas + verificar("movimentação do tipo VENDA", movimentacoes[0]["tipo"], "VENDA")
+    carrinho.clear()
+    falhas = falhas + verificar("venda guarda cópia dos itens (limpar o carrinho não a altera)",
+                                len(vendas[0]["itens"]), 2)
 
     # Venda impossível: o segundo item não tem saldo -> nada pode mudar
     carrinho = []
@@ -157,7 +160,19 @@ def testar_venda():
     falhas = falhas + verificar("primeiro item não baixou (tudo-ou-nada)", produtos[0]["saldo"], 7)
     falhas = falhas + verificar("nenhuma venda nova", len(vendas), 1)
     falhas = falhas + verificar("nenhuma movimentação nova", len(movimentacoes), 2)
-    falhas = falhas + verificar("carrinho vazio não vira venda", caixa.efetivar_venda(produtos, vendas, movimentacoes, [], data), None)
+    falhas = falhas + verificar("carrinho vazio não vira venda",
+                                caixa.efetivar_venda(produtos, vendas, movimentacoes, [], data), None)
+
+    # Carrinho montado à mão com o MESMO produto em dois itens (2 + 2 com saldo 2):
+    # a 1ª passada confere o total do produto, então nada pode mudar
+    item = {"codigo": 2, "nome": "Caneta", "quantidade": 2,
+            "preco_unitario_centavos": 500, "subtotal_centavos": 1000}
+    carrinho = [item, item.copy()]
+    venda = caixa.efetivar_venda(produtos, vendas, movimentacoes, carrinho, data)
+    falhas = falhas + verificar("produto repetido acima do saldo é recusado", venda, None)
+    falhas = falhas + verificar("produto repetido não baixa o saldo", produtos[1]["saldo"], 2)
+    falhas = falhas + verificar("quantidade_no_carrinho soma os itens do produto",
+                                caixa.quantidade_no_carrinho(carrinho, 2), 4)
     return falhas
 
 
