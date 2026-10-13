@@ -10,6 +10,7 @@ Fluxo do programa:
 """
 
 import os
+import sys
 
 from loja import leitura
 from loja import persistencia
@@ -58,8 +59,20 @@ def executar_menu(produtos, vendas, movimentacoes):
         print(AVISO_NAO_SALVOU)
 
 
+def configurar_acentos():
+    """Usa UTF-8 na entrada e na saída do terminal, para os acentos aparecerem e serem
+    lidos corretamente também em terminais como o Git Bash. Onde esse recurso não
+    existe (ex.: IDLE), não faz nada."""
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+    if hasattr(sys.stdin, "reconfigure"):
+        sys.stdin.reconfigure(encoding="utf-8")
+
+
 def main():
-    produtos, vendas, movimentacoes, aviso = persistencia.carregar_dados(CAMINHO_DADOS, CAMINHO_EXEMPLO)
+    configurar_acentos()
+    produtos, vendas, movimentacoes, aviso = persistencia.carregar_dados(CAMINHO_DADOS,
+                                                                         CAMINHO_EXEMPLO)
     if aviso != "":
         print(aviso)
     try:
