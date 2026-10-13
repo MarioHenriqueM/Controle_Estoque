@@ -44,7 +44,7 @@ persistencia.salvar ────┘     se o estado mudou, salva no arquivo
 
 O código é dividido em três camadas:
 
-- **Interação** (`leitura`, `telas`, `formatacao`): são os únicos módulos que conversam com o usuário.
+- **Interação** (`leitura`, `telas`, `formatacao` e o próprio `main.py`): `leitura` é o único módulo com `input()`; `telas` e `main.py` mostram mensagens com `print()`; `formatacao` só monta os textos (devolve strings) que as telas imprimem.
 - **Regras** (`cadastro`, `estoque`, `caixa`, `relatorios`): recebem dados prontos, calculam e alteram as listas, sem `input()` nem `print()`. Por isso podem ser testadas automaticamente em `testes.py`.
 - **Dados** (`persistencia`): é o único módulo que abre arquivos.
 
@@ -69,12 +69,22 @@ reais_texto = f"{reais:,}".replace(",", ".")  # 1234 -> "1,234" -> "1.234"
 return f"{sinal}R$ {reais_texto},{resto:02d}"   # "R$ 1.234,56"
 ```
 
-**`main.py`, função `main`:** a sequência do programa inteiro. Ela configura o terminal, carrega os dados, mostra o aviso (se houver) e, em seguida, chama `executar_menu(produtos, vendas, movimentacoes)` dentro de um `try`.
+**`main.py`, função `main`:** a sequência do programa inteiro. Ela:
+
+1. configura o terminal;
+2. carrega os dados (se o arquivo não puder ser aberto, avisa e encerra);
+3. mostra o aviso, se houver;
+4. chama `executar_menu(produtos, vendas, movimentacoes)` dentro de um `try`.
 
 ```python
 configurar_acentos()
-produtos, vendas, movimentacoes, aviso = persistencia.carregar_dados(CAMINHO_DADOS,
-                                                                     CAMINHO_EXEMPLO)
+try:
+    produtos, vendas, movimentacoes, aviso = persistencia.carregar_dados(CAMINHO_DADOS,
+                                                                         CAMINHO_EXEMPLO)
+except OSError:
+    print("Não foi possível abrir o arquivo de dados (ele está aberto em outro programa?).")
+    print("Feche o arquivo e execute o programa de novo.")
+    return
 if aviso != "":
     print(aviso)
 ```
@@ -253,7 +263,7 @@ Por isso `cadastro.buscar_produto` devolve o **próprio dicionário** que está 
 
 - **Variáveis locais:**
   - `produtos`, `vendas` e `movimentacoes` são locais da função `main` e chegam às outras funções **por parâmetro**.
-  - `opcao` e `alterou` são locais de `executar_menu` e recebem um valor novo a cada volta do laço (`alterou = False` no início de cada volta).
+  - `opcao` e `alterou` são locais de `executar_menu` e recebem um valor novo a cada volta do laço. Em cada volta, depois de mostrar o menu e ler a opção, `alterou = False` zera a variável antes do `if/elif`.
   - Quando a função termina, as variáveis locais dela deixam de existir. Por exemplo, o `carrinho` de `telas.registrar_venda` nasce vazio (`carrinho = []`) a cada venda.
 - **Constantes de módulo:**
   - São os nomes em MAIÚSCULAS, como `CAMINHO_DADOS` (`main.py`), `MAXIMO_DIGITOS` (`leitura.py`), `TIPO_VENDA` e `MOTIVOS_SAIDA` (`estoque.py`).
@@ -347,7 +357,8 @@ vendas.append(venda)
 - **Equivalente em C:**
   - cada dicionário faria o papel de uma `struct` (por exemplo, `struct Produto { int codigo; char nome[31]; int preco_centavos; int saldo; }`);
   - a lista seria um vetor de `struct` com um contador de posições em uso;
-  - passar a lista para uma função seria como passar um ponteiro para esse vetor.
+  - passar a lista para uma função seria como passar um ponteiro para o vetor e um ponteiro para o contador (ou um ponteiro para uma `struct` que guarde os dois), para que a função também possa acrescentar elementos;
+  - passar um produto seria como passar `struct Produto *p`, e não a `struct` por valor, que em C seria copiada (e aí a alteração do saldo não valeria fora da função).
 
 ### 5.2 A ordem das instruções importa
 
@@ -360,7 +371,11 @@ vendas.append(venda)
 **Aliasing** é quando dois nomes apontam para o mesmo objeto. Às vezes ele é desejado: `buscar_produto` devolve o próprio dicionário da lista justamente para que a alteração do saldo valha no estoque. Em outros casos, seria perigoso, e o código **copia de propósito**:
 
 - **Ao entrar no carrinho**, o item copia o **nome e o preço** do produto (`caixa.adicionar_ao_carrinho`). Se o preço do produto mudar depois, a venda continua com o preço daquele momento ("preço congelado"). O teste "preço fica congelado no item" comprova isso.
-- **Ao registrar a venda**, `efetivar_venda` guarda **cópias** dos itens (`itens.append(item.copy())`). Mesmo que a lista `carrinho` seja limpa ou alterada depois, a venda registrada não muda. O teste "venda guarda cópia dos itens" comprova isso.
+- **Ao registrar a venda**, `efetivar_venda` monta uma lista nova, `itens`, com cópias de cada item (`itens.append(item.copy())`). Por isso, limpar o carrinho ou alterar um item dele depois não muda a venda registrada. Os testes comprovam as duas partes:
+  - "venda guarda cópia dos itens (limpar o carrinho não a altera)": a venda não usa a mesma lista;
+  - "alterar um item do carrinho não altera a venda": cada item foi copiado.
+
+  O `.copy()` faz uma cópia **rasa**: copia o dicionário, mas não o que está dentro dele. Isso basta aqui, porque os valores do item são números e textos, que são imutáveis.
 
 ### 5.4 Valor sentinela -1 na leitura de números
 

@@ -48,7 +48,7 @@ Um pequeno comércio (por exemplo, uma papelaria) precisa saber **quanto tem de 
 ### Decisões técnicas
 
 - **Dinheiro em centavos:** os preços são guardados como inteiros de centavos (`19,99` vira `1999`), o que evita os erros de arredondamento dos números com casas decimais. Na tela, aparecem como `R$ 1.234,56`.
-- **Persistência:** os dados ficam em `dados/loja.json` e são salvos após cada operação, com gravação segura (arquivo temporário + troca). Se o arquivo estiver corrompido ou com formato inválido, o programa guarda uma cópia `.corrompido`, avisa e começa vazio.
+- **Persistência:** os dados ficam em `dados/loja.json` e são salvos após cada operação, com gravação segura (arquivo temporário + troca). Se o arquivo estiver corrompido ou com formato inválido, o programa guarda uma cópia `.corrompido`, avisa e começa vazio. Se o arquivo não puder ser aberto (por exemplo, bloqueado por outro programa), o programa avisa e encerra sem alterá-lo.
 
 ### Resultados esperados
 
@@ -139,7 +139,7 @@ O resultado esperado é `Todos os testes passaram.`, com código de saída 0.
     └── EXPLICACAO.md    # explicação detalhada da solução, com trechos do código
 ```
 
-O estado do programa são **três listas** criadas no `main.py` e passadas como parâmetro para as funções: `produtos`, `vendas` e `movimentacoes`. Cada registro é um dicionário, por exemplo `{"codigo": 1, "nome": "Caneta azul", "preco_centavos": 250, "saldo": 97}`.
+O estado do programa são **três listas** criadas no `main.py` e passadas como parâmetro para as funções: `produtos`, `vendas` e `movimentacoes`. Cada registro é um dicionário. Por exemplo, a Caneta azul dos dados de exemplo é `{"codigo": 2, "nome": "Caneta azul", "preco_centavos": 250, "saldo": 82}`.
 
 ## 5. Explicação da solução
 
@@ -186,8 +186,9 @@ Cada decisão aparece no formato **o que escolhi** (em vez do quê) e o motivo.
 - **Ler preços com vírgula sem usar `float`.** A solução foi separar reais e centavos pelo texto e validar cada parte (`texto_para_centavos`). Os testes "0,29 sem erro de float" e "três casas é inválido" provam o resultado.
 - **Produto repetido no carrinho.** Adicionar o mesmo produto duas vezes podia ultrapassar o saldo. Passei a somar no mesmo item e a calcular o *disponível* como saldo menos o que já está no carrinho. Na revisão final, a confirmação da venda também passou a conferir o **total** de cada produto, garantindo o tudo-ou-nada (teste "produto repetido acima do saldo é recusado").
 - **Nomes de módulos × nomes de variáveis.** Um módulo `vendas.py` entraria em conflito com a lista `vendas` recebida como parâmetro. Por isso os módulos se chamam `caixa`, `cadastro` e `estoque`.
-- **Acentuação no Windows.** Todo `open()` usa `encoding="utf-8"`. Na revisão final, descobri que no Git Bash o menu saía com caracteres trocados e um nome digitado como "Lápis" era gravado como "LÃ¡pis". O `main` passou a configurar UTF-8 na entrada e na saída (`configurar_acentos`).
-- **Ordem das perguntas.** Na saída avulsa, o motivo era pedido antes de conferir o saldo. Inverti para recusar logo uma quantidade maior que o saldo.
+- **Acentuação no Windows.** Todo `open()` informa a codificação de forma explícita: `"utf-8"` na gravação e `"utf-8-sig"` na leitura, que também aceita arquivos salvos com BOM (como os do Bloco de Notas). Na revisão final, descobri que no Git Bash o menu saía com caracteres trocados e um nome digitado como "Lápis" era gravado como "LÃ¡pis". O `main` passou a configurar UTF-8 na entrada e na saída (`configurar_acentos`).
+- **Ordem das perguntas.** No primeiro teste da saída avulsa, o motivo era pedido antes de conferir o saldo: o usuário escolhia o motivo e só depois era recusado. Ajustei para conferir o saldo logo depois da quantidade. A correção entrou no mesmo commit da tela.
+- **Manter o estilo imperativo.** Foi preciso disciplina para não usar atalhos como *comprehensions* e para cuidar do aliasing das listas passadas por parâmetro. Na revisão, percebi que a venda guardava a mesma lista do carrinho, e ela passou a guardar cópias dos itens.
 - **Arquivo de dados editado à mão.** Um JSON válido, mas sem as chaves ou com os tipos errados (um produto sem `"nome"`, ou um preço como texto), derrubava o programa. Agora a estrutura é validada ao carregar (`persistencia.estrutura_valida`), e o arquivo inválido é guardado como cópia `.corrompido` (testes "estrutura errada começa vazio" e "preço como texto é inválido").
 
 ### Possíveis melhorias
@@ -202,7 +203,6 @@ Cada decisão aparece no formato **o que escolhi** (em vez do quê) e o motivo.
 
 - Buscar produtos por parte do nome.
 - Destacar o produto mais vendido e gerar relatórios por período (data inicial e final).
-- Tratar o caso de o arquivo de dados estar aberto ou bloqueado por outro programa quando o sistema inicia.
 - Interface gráfica ou banco de dados, para um uso real com mais dados.
 
 Elas ficaram de fora para manter o programa pequeno, correto e fácil de explicar no porte desta atividade.
