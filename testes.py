@@ -147,6 +147,9 @@ def testar_venda():
     falhas = falhas + verificar("saldo da caneta baixou (4 -> 2)", produtos[1]["saldo"], 2)
     falhas = falhas + verificar("uma movimentação VENDA por item", len(movimentacoes), 2)
     falhas = falhas + verificar("movimentação do tipo VENDA", movimentacoes[0]["tipo"], "VENDA")
+    carrinho[0]["quantidade"] = 999
+    falhas = falhas + verificar("alterar um item do carrinho não altera a venda",
+                                vendas[0]["itens"][0]["quantidade"], 3)
     carrinho.clear()
     falhas = falhas + verificar("venda guarda cópia dos itens (limpar o carrinho não a altera)",
                                 len(vendas[0]["itens"]), 2)
@@ -284,6 +287,8 @@ def testar_persistencia():
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")    # acentos corretos também no Git Bash
     total_falhas = 0
     total_falhas = total_falhas + testar_texto_para_inteiro()
     total_falhas = total_falhas + testar_texto_para_centavos()

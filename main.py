@@ -71,8 +71,15 @@ def configurar_acentos():
 
 def main():
     configurar_acentos()
-    produtos, vendas, movimentacoes, aviso = persistencia.carregar_dados(CAMINHO_DADOS,
-                                                                         CAMINHO_EXEMPLO)
+    try:
+        produtos, vendas, movimentacoes, aviso = persistencia.carregar_dados(CAMINHO_DADOS,
+                                                                             CAMINHO_EXEMPLO)
+    except OSError:
+        # Arquivo de dados bloqueado ou sem permissão de leitura: encerra sem mexer nele,
+        # para não correr o risco de sobrescrever os dados depois.
+        print("Não foi possível abrir o arquivo de dados (ele está aberto em outro programa?).")
+        print("Feche o arquivo e execute o programa de novo.")
+        return
     if aviso != "":
         print(aviso)
     try:
