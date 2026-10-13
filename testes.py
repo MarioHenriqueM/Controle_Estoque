@@ -16,6 +16,7 @@ from loja import estoque
 from loja import formatacao
 from loja import leitura
 from loja import persistencia
+from loja import relatorios
 
 
 def verificar(descricao, obtido, esperado):
@@ -160,6 +161,45 @@ def testar_venda():
     return falhas
 
 
+def testar_relatorios():
+    falhas = 0
+    data = "13/10/2026 10:00"
+    produtos = [cadastro.criar_produto(1, "Caderno", 1999, 10),
+                cadastro.criar_produto(2, "Caneta", 500, 10),
+                cadastro.criar_produto(3, "Borracha", 150, 10)]
+    vendas = []
+    movimentacoes = []
+
+    falhas = falhas + verificar("faturamento sem vendas é zero", relatorios.faturamento_total(vendas), 0)
+    falhas = falhas + verificar("ticket médio sem vendas não divide por zero", relatorios.ticket_medio_centavos(0, 0), 0)
+    linhas, valor_antes = relatorios.valor_do_estoque(produtos)
+    falhas = falhas + verificar("valor do estoque inicial", valor_antes, 10 * 1999 + 10 * 500 + 10 * 150)
+
+    carrinho = []
+    caixa.adicionar_ao_carrinho(carrinho, produtos[0], 3)
+    caixa.adicionar_ao_carrinho(carrinho, produtos[1], 2)
+    caixa.efetivar_venda(produtos, vendas, movimentacoes, carrinho, data)
+    carrinho = []
+    caixa.adicionar_ao_carrinho(carrinho, produtos[1], 1)
+    caixa.efetivar_venda(produtos, vendas, movimentacoes, carrinho, data)
+
+    faturamento = relatorios.faturamento_total(vendas)
+    falhas = falhas + verificar("faturamento de 2 vendas (69,97 + 5,00)", faturamento, 7497)
+    falhas = falhas + verificar("ticket médio (7497 / 2 = 3748,5 -> 3749)", relatorios.ticket_medio_centavos(faturamento, 2), 3749)
+    falhas = falhas + verificar("ticket médio 1000 / 3 arredonda para baixo", relatorios.ticket_medio_centavos(1000, 3), 333)
+
+    resumo = relatorios.vendas_por_produto(produtos, vendas)
+    falhas = falhas + verificar("resumo inclui todos os produtos", len(resumo), 3)
+    falhas = falhas + verificar("caneta vendeu 3 unidades", resumo[1]["unidades"], 3)
+    falhas = falhas + verificar("caneta vendeu R$ 15,00", resumo[1]["valor_centavos"], 1500)
+    falhas = falhas + verificar("borracha vendeu 0", resumo[2]["unidades"], 0)
+
+    linhas, valor_depois = relatorios.valor_do_estoque(produtos)
+    falhas = falhas + verificar("queda do valor do estoque = total vendido", valor_antes - valor_depois, faturamento)
+    falhas = falhas + verificar("valor do caderno no estoque (7 x 19,99)", linhas[0]["valor_centavos"], 7 * 1999)
+    return falhas
+
+
 def testar_persistencia():
     falhas = 0
     pasta = tempfile.mkdtemp()
@@ -206,6 +246,7 @@ def main():
     total_falhas = total_falhas + testar_estoque()
     total_falhas = total_falhas + testar_carrinho()
     total_falhas = total_falhas + testar_venda()
+    total_falhas = total_falhas + testar_relatorios()
     total_falhas = total_falhas + testar_persistencia()
     print()
     if total_falhas > 0:
