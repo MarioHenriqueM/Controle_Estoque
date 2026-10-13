@@ -233,6 +233,27 @@ def testar_persistencia():
     falhas = falhas + verificar("primeira execução carrega o exemplo", lidos, produtos)
     falhas = falhas + verificar("aviso de exemplo carregado", aviso, "Primeira execução: dados de exemplo carregados.")
 
+    # 5. Arquivo salvo com BOM (ex.: Bloco de Notas) continua legível
+    with open(caminho, "w", encoding="utf-8-sig") as arquivo:
+        arquivo.write('{"produtos": [], "vendas": [], "movimentacoes": []}')
+    lidos, vendas, movimentacoes, aviso = persistencia.carregar_dados(caminho, caminho_exemplo)
+    falhas = falhas + verificar("arquivo com BOM é aceito", aviso, "")
+
+    # 6. JSON válido com estrutura errada (produto sem "nome") é tratado como inválido,
+    #    e uma segunda cópia não apaga a primeira (.corrompido2)
+    with open(caminho, "w", encoding="utf-8") as arquivo:
+        arquivo.write('{"produtos": [{"codigo": 1}]}')
+    lidos, vendas, movimentacoes, aviso = persistencia.carregar_dados(caminho, caminho_exemplo)
+    falhas = falhas + verificar("estrutura errada começa vazio", len(lidos), 0)
+    falhas = falhas + verificar("segunda cópia vira .corrompido2", os.path.exists(caminho + ".corrompido2"), True)
+    falhas = falhas + verificar("primeira cópia continua existindo", os.path.exists(caminho + ".corrompido"), True)
+
+    # 7. Exemplo inválido: começa vazio, com aviso
+    with open(caminho_exemplo, "w", encoding="utf-8") as arquivo:
+        arquivo.write("[]")
+    lidos, vendas, movimentacoes, aviso = persistencia.carregar_dados(caminho, caminho_exemplo)
+    falhas = falhas + verificar("exemplo inválido gera aviso", aviso, "Arquivo de exemplo inválido: começando sem dados.")
+
     shutil.rmtree(pasta)
     return falhas
 
