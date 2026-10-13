@@ -10,6 +10,7 @@ import shutil
 import sys
 import tempfile
 
+from loja import cadastro
 from loja import formatacao
 from loja import leitura
 from loja import persistencia
@@ -59,6 +60,23 @@ def testar_formatar_moeda():
     return falhas
 
 
+def testar_cadastro():
+    falhas = 0
+    produtos = []
+    novo = cadastro.cadastrar_produto(produtos, 1, "Caneta", 250, 10)
+    falhas = falhas + verificar("cadastro acrescenta o produto", len(produtos), 1)
+    falhas = falhas + verificar("preço guardado em centavos", novo["preco_centavos"], 250)
+    repetido = cadastro.cadastrar_produto(produtos, 1, "Lápis", 150, 5)
+    falhas = falhas + verificar("código duplicado é recusado", repetido, None)
+    falhas = falhas + verificar("duplicado não altera a lista", len(produtos), 1)
+    achado = cadastro.buscar_produto(produtos, 1)
+    falhas = falhas + verificar("busca devolve o produto certo", achado["nome"], "Caneta")
+    falhas = falhas + verificar("busca de código inexistente", cadastro.buscar_produto(produtos, 99), None)
+    achado["saldo"] = 7
+    falhas = falhas + verificar("busca devolve o próprio registro da lista", produtos[0]["saldo"], 7)
+    return falhas
+
+
 def testar_persistencia():
     falhas = 0
     pasta = tempfile.mkdtemp()
@@ -101,6 +119,7 @@ def main():
     total_falhas = total_falhas + testar_texto_para_inteiro()
     total_falhas = total_falhas + testar_texto_para_centavos()
     total_falhas = total_falhas + testar_formatar_moeda()
+    total_falhas = total_falhas + testar_cadastro()
     total_falhas = total_falhas + testar_persistencia()
     print()
     if total_falhas > 0:
