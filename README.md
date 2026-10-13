@@ -28,5 +28,6 @@ python testes.py
 - [x] Dados salvos em `dados/loja.json` a cada alteração
 - [x] Entrada de itens e saída avulsa (perda, avaria, uso interno)
 - [x] Histórico de movimentações e extrato por produto
-- [ ] Venda com vários itens e comprovante
-- [ ] Relatórios: faturamento, vendas por produto, valor do estoque
+- [x] Venda com vários itens e comprovante
+- [x] Relatórios: faturamento, vendas por produto, valor do estoque e todas as vendas
+- [x] Dados de exemplo (`dados/exemplo.json`) carregados na primeira execução

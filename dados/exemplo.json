@@ -1,0 +1,213 @@
+{
+  "produtos": [
+    {
+      "codigo": 1,
+      "nome": "Caderno 96 folhas",
+      "preco_centavos": 1999,
+      "saldo": 47
+    },
+    {
+      "codigo": 2,
+      "nome": "Caneta azul",
+      "preco_centavos": 250,
+      "saldo": 82
+    },
+    {
+      "codigo": 3,
+      "nome": "Lápis grafite",
+      "preco_centavos": 120,
+      "saldo": 68
+    },
+    {
+      "codigo": 4,
+      "nome": "Borracha branca",
+      "preco_centavos": 150,
+      "saldo": 48
+    },
+    {
+      "codigo": 5,
+      "nome": "Mochila escolar",
+      "preco_centavos": 8990,
+      "saldo": 7
+    }
+  ],
+  "vendas": [
+    {
+      "numero": 1,
+      "data": "13/10/2026 12:09",
+      "itens": [
+        {
+          "codigo": 1,
+          "nome": "Caderno 96 folhas",
+          "quantidade": 3,
+          "preco_unitario_centavos": 1999,
+          "subtotal_centavos": 5997
+        },
+        {
+          "codigo": 2,
+          "nome": "Caneta azul",
+          "quantidade": 5,
+          "preco_unitario_centavos": 250,
+          "subtotal_centavos": 1250
+        }
+      ],
+      "total_centavos": 7247
+    },
+    {
+      "numero": 2,
+      "data": "13/10/2026 12:09",
+      "itens": [
+        {
+          "codigo": 5,
+          "nome": "Mochila escolar",
+          "quantidade": 1,
+          "preco_unitario_centavos": 8990,
+          "subtotal_centavos": 8990
+        },
+        {
+          "codigo": 4,
+          "nome": "Borracha branca",
+          "quantidade": 2,
+          "preco_unitario_centavos": 150,
+          "subtotal_centavos": 300
+        }
+      ],
+      "total_centavos": 9290
+    },
+    {
+      "numero": 3,
+      "data": "13/10/2026 12:09",
+      "itens": [
+        {
+          "codigo": 3,
+          "nome": "Lápis grafite",
+          "quantidade": 10,
+          "preco_unitario_centavos": 120,
+          "subtotal_centavos": 1200
+        },
+        {
+          "codigo": 2,
+          "nome": "Caneta azul",
+          "quantidade": 10,
+          "preco_unitario_centavos": 250,
+          "subtotal_centavos": 2500
+        }
+      ],
+      "total_centavos": 3700
+    }
+  ],
+  "movimentacoes": [
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "ENTRADA",
+      "codigo": 1,
+      "quantidade": 30,
+      "motivo": "saldo inicial",
+      "saldo_apos": 30
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "ENTRADA",
+      "codigo": 2,
+      "quantidade": 100,
+      "motivo": "saldo inicial",
+      "saldo_apos": 100
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "ENTRADA",
+      "codigo": 3,
+      "quantidade": 80,
+      "motivo": "saldo inicial",
+      "saldo_apos": 80
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "ENTRADA",
+      "codigo": 4,
+      "quantidade": 50,
+      "motivo": "saldo inicial",
+      "saldo_apos": 50
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "ENTRADA",
+      "codigo": 5,
+      "quantidade": 8,
+      "motivo": "saldo inicial",
+      "saldo_apos": 8
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "ENTRADA",
+      "codigo": 1,
+      "quantidade": 20,
+      "motivo": "compra",
+      "saldo_apos": 50
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "SAIDA",
+      "codigo": 2,
+      "quantidade": 3,
+      "motivo": "avaria",
+      "saldo_apos": 97
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "SAIDA",
+      "codigo": 3,
+      "quantidade": 2,
+      "motivo": "perda",
+      "saldo_apos": 78
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "VENDA",
+      "codigo": 1,
+      "quantidade": 3,
+      "motivo": "venda 1",
+      "saldo_apos": 47
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "VENDA",
+      "codigo": 2,
+      "quantidade": 5,
+      "motivo": "venda 1",
+      "saldo_apos": 92
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "VENDA",
+      "codigo": 5,
+      "quantidade": 1,
+      "motivo": "venda 2",
+      "saldo_apos": 7
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "VENDA",
+      "codigo": 4,
+      "quantidade": 2,
+      "motivo": "venda 2",
+      "saldo_apos": 48
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "VENDA",
+      "codigo": 3,
+      "quantidade": 10,
+      "motivo": "venda 3",
+      "saldo_apos": 68
+    },
+    {
+      "data": "13/10/2026 12:09",
+      "tipo": "VENDA",
+      "codigo": 2,
+      "quantidade": 10,
+      "motivo": "venda 3",
+      "saldo_apos": 82
+    }
+  ]
+}
