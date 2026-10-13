@@ -4,6 +4,8 @@ Funções puras: recebem valores e DEVOLVEM uma string (não chamam print()).
 Dinheiro chega sempre em centavos (int).
 """
 
+from loja import estoque
+
 
 def formatar_moeda(centavos):
     """Recebe um valor em centavos (int) e devolve o texto 'R$ 1.234,56'."""
@@ -34,3 +36,27 @@ def linha_produto(produto):
     preco = formatar_moeda(produto["preco_centavos"])
     saldo = produto["saldo"]
     return f"{codigo:>6}  {nome:<30}  {preco:>14}  {saldo:>7}"
+
+
+def cabecalho_extrato():
+    """Devolve o cabeçalho da tabela de movimentações (extrato)."""
+    data = "Data"
+    tipo = "Tipo"
+    quantidade = "Qtd"
+    motivo = "Motivo"
+    saldo = "Saldo após"
+    titulo = f"{data:<16}  {tipo:<8}  {quantidade:>7}  {motivo:<14}  {saldo:>10}"
+    return titulo + "\n" + "-" * len(titulo)
+
+
+def linha_extrato(movimentacao):
+    """Devolve uma linha do extrato: entradas com '+' e saídas/vendas com '-'."""
+    data = movimentacao["data"]
+    tipo = movimentacao["tipo"]
+    motivo = movimentacao["motivo"]
+    saldo = movimentacao["saldo_apos"]
+    if tipo == estoque.TIPO_ENTRADA:
+        quantidade = "+" + str(movimentacao["quantidade"])
+    else:
+        quantidade = "-" + str(movimentacao["quantidade"])
+    return f"{data:<16}  {tipo:<8}  {quantidade:>7}  {motivo:<14}  {saldo:>10}"

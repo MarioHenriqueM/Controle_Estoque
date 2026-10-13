@@ -29,11 +29,15 @@ def executar_menu(produtos, vendas, movimentacoes):
         opcao = leitura.ler_inteiro("Escolha uma opção: ", 0)
         alterou = False
         if opcao == 1:
-            alterou = telas.cadastrar_produto(produtos)
-        elif opcao == 2 or opcao == 3 or opcao == 4 or opcao == 7:
+            alterou = telas.cadastrar_produto(produtos, movimentacoes)
+        elif opcao == 2:
+            alterou = telas.registrar_entrada(produtos, movimentacoes)
+        elif opcao == 3:
+            alterou = telas.registrar_saida(produtos, movimentacoes)
+        elif opcao == 4 or opcao == 7:
             telas.opcao_em_construcao()
         elif opcao == 5:
-            telas.consultar_saldo(produtos)
+            telas.consultar_saldo(produtos, movimentacoes)
         elif opcao == 6:
             telas.listar_estoque(produtos)
         elif opcao == 0:

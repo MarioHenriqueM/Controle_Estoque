@@ -26,6 +26,7 @@ python testes.py
 - [x] Cadastro de produtos (código único, nome, preço e saldo inicial)
 - [x] Consulta de saldo e listagem do estoque
 - [x] Dados salvos em `dados/loja.json` a cada alteração
-- [ ] Entrada de itens e saída avulsa (perda, avaria, uso interno)
+- [x] Entrada de itens e saída avulsa (perda, avaria, uso interno)
+- [x] Histórico de movimentações e extrato por produto
 - [ ] Venda com vários itens e comprovante
 - [ ] Relatórios: faturamento, vendas por produto, valor do estoque
