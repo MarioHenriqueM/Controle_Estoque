@@ -10,11 +10,23 @@ import os
 
 CHAVES_PRODUTO = ["codigo", "nome", "preco_centavos", "saldo"]
 CHAVES_VENDA = ["numero", "data", "itens", "total_centavos"]
+CHAVES_ITEM = ["codigo", "nome", "quantidade", "preco_unitario_centavos", "subtotal_centavos"]
 CHAVES_MOVIMENTACAO = ["data", "tipo", "codigo", "quantidade", "motivo", "saldo_apos"]
+CAMPOS_TEXTO = ["nome", "data", "tipo", "motivo"]
+
+
+def valor_valido(chave, valor):
+    """Campos de texto precisam ser str; 'itens' precisa ser lista; os demais são inteiros."""
+    if chave in CAMPOS_TEXTO:
+        return isinstance(valor, str)
+    if chave == "itens":
+        return isinstance(valor, list)
+    return isinstance(valor, int)
 
 
 def lista_valida(registros, chaves):
-    """Devolve True se 'registros' é uma lista de dicionários que têm todas as 'chaves'."""
+    """Devolve True se 'registros' é uma lista de dicionários que têm todas as 'chaves',
+    cada uma com um valor do tipo esperado."""
     if not isinstance(registros, list):
         return False
     for registro in registros:
@@ -23,15 +35,21 @@ def lista_valida(registros, chaves):
         for chave in chaves:
             if chave not in registro:
                 return False
+            if not valor_valido(chave, registro[chave]):
+                return False
     return True
 
 
 def estrutura_valida(dados):
-    """Confere se as três listas do arquivo têm o formato esperado."""
+    """Confere se as três listas do arquivo (e os itens de cada venda) têm o formato esperado."""
+    vendas = dados.get("vendas", [])
     if not lista_valida(dados.get("produtos", []), CHAVES_PRODUTO):
         return False
-    if not lista_valida(dados.get("vendas", []), CHAVES_VENDA):
+    if not lista_valida(vendas, CHAVES_VENDA):
         return False
+    for venda in vendas:
+        if not lista_valida(venda["itens"], CHAVES_ITEM):
+            return False
     if not lista_valida(dados.get("movimentacoes", []), CHAVES_MOVIMENTACAO):
         return False
     return True

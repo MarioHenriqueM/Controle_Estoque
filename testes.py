@@ -263,6 +263,16 @@ def testar_persistencia():
     falhas = falhas + verificar("segunda cópia vira .corrompido2", os.path.exists(caminho + ".corrompido2"), True)
     falhas = falhas + verificar("primeira cópia continua existindo", os.path.exists(caminho + ".corrompido"), True)
 
+    # 6b. Tipos errados também tornam o arquivo inválido: preço como texto
+    #     e item de venda sem o campo "quantidade"
+    falhas = falhas + verificar("preço como texto é inválido",
+                                persistencia.estrutura_valida({"produtos": [
+                                    {"codigo": 1, "nome": "Caneta", "preco_centavos": "abc", "saldo": 1}]}), False)
+    venda_ruim = {"numero": 1, "data": "13/10/2026 10:00", "total_centavos": 250,
+                  "itens": [{"codigo": 1, "nome": "Caneta", "preco_unitario_centavos": 250, "subtotal_centavos": 250}]}
+    falhas = falhas + verificar("item de venda sem quantidade é inválido",
+                                persistencia.estrutura_valida({"vendas": [venda_ruim]}), False)
+
     # 7. Exemplo inválido: começa vazio, com aviso
     with open(caminho_exemplo, "w", encoding="utf-8") as arquivo:
         arquivo.write("[]")
