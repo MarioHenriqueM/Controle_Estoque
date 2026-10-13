@@ -12,6 +12,7 @@ Fluxo do programa:
 import os
 import sys
 
+from loja import formatacao
 from loja import leitura
 from loja import persistencia
 from loja import telas
@@ -46,17 +47,19 @@ def executar_menu(produtos, vendas, movimentacoes):
         elif opcao == 0:
             executando = False
         else:
-            print("Opção inválida.")
+            print(formatacao.erro("Opção inválida."))
         if alterou:
             salvou = persistencia.salvar_dados(CAMINHO_DADOS, produtos, vendas, movimentacoes)
             if not salvou:
-                print(AVISO_NAO_SALVOU)
+                print(formatacao.erro(AVISO_NAO_SALVOU))
+        if executando:
+            telas.pausar()            # dá tempo de ler o resultado antes de voltar ao menu
 
     salvou = persistencia.salvar_dados(CAMINHO_DADOS, produtos, vendas, movimentacoes)
     if salvou:
-        print("Dados salvos. Até logo!")
+        print(formatacao.sucesso("Dados salvos. Até logo!"))
     else:
-        print(AVISO_NAO_SALVOU)
+        print(formatacao.erro(AVISO_NAO_SALVOU))
 
 
 def configurar_acentos():
@@ -71,24 +74,27 @@ def configurar_acentos():
 
 def main():
     configurar_acentos()
+    telas.limpar_tela()
     try:
         produtos, vendas, movimentacoes, aviso = persistencia.carregar_dados(CAMINHO_DADOS,
                                                                              CAMINHO_EXEMPLO)
     except OSError:
         # Arquivo de dados bloqueado ou sem permissão de leitura: encerra sem mexer nele,
         # para não correr o risco de sobrescrever os dados depois.
-        print("Não foi possível abrir o arquivo de dados (ele está aberto em outro programa?).")
+        print(formatacao.erro("Não foi possível abrir o arquivo de dados "
+                              + "(ele está aberto em outro programa?)."))
         print("Feche o arquivo e execute o programa de novo.")
         return
     if aviso != "":
-        print(aviso)
+        print(formatacao.aviso(aviso))
     try:
         executar_menu(produtos, vendas, movimentacoes)
     except (EOFError, KeyboardInterrupt):
         # Ctrl+C ou fim da entrada: encerra sem mensagem de erro e SEM salvar,
         # porque cada operação concluída já foi salva logo depois de acontecer.
         print()
-        print("Programa encerrado. As operações salvas até aqui continuam no arquivo de dados.")
+        print(formatacao.aviso("Programa encerrado. As operações salvas até aqui "
+                               + "continuam no arquivo de dados."))
 
 
 if __name__ == "__main__":

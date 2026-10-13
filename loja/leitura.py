@@ -7,6 +7,8 @@ As conversões texto -> número (texto_para_*) não leem o teclado, por isso
 podem ser testadas automaticamente em testes.py.
 """
 
+from loja import formatacao
+
 MAXIMO_DIGITOS = 6    # quantidades e códigos até 999.999; preço até R$ 999.999,99
 
 
@@ -52,9 +54,10 @@ def ler_inteiro(mensagem, minimo):
         texto = input(mensagem)
         numero = texto_para_inteiro(texto)
         if numero == -1:
-            print("Valor inválido: digite só números inteiros, sem sinal, com até 6 dígitos.")
+            print(formatacao.erro("Valor inválido: digite só números inteiros, "
+                                  + "sem sinal, com até 6 dígitos."))
         elif numero < minimo:
-            print(f"Digite um número maior ou igual a {minimo}.")
+            print(formatacao.erro(f"Digite um número maior ou igual a {minimo}."))
         else:
             valido = True
     return numero
@@ -68,8 +71,8 @@ def ler_preco_centavos(mensagem):
         texto = input(mensagem)
         centavos = texto_para_centavos(texto)
         if centavos <= 0:
-            print("Preço inválido. Use o formato 12,50 "
-                  + "(de R$ 0,01 a R$ 999.999,99, sem separador de milhar).")
+            print(formatacao.erro("Preço inválido. Use o formato 12,50 "
+                                  + "(de R$ 0,01 a R$ 999.999,99, sem separador de milhar)."))
     return centavos
 
 
@@ -80,9 +83,9 @@ def ler_texto(mensagem, maximo):
     while not valido:
         texto = input(mensagem).strip()
         if texto == "":
-            print("O texto não pode ficar vazio.")
+            print(formatacao.erro("O texto não pode ficar vazio."))
         elif len(texto) > maximo:
-            print(f"Use no máximo {maximo} caracteres.")
+            print(formatacao.erro(f"Use no máximo {maximo} caracteres."))
         else:
             valido = True
     return texto
@@ -94,5 +97,10 @@ def ler_confirmacao(mensagem):
     while resposta != "s" and resposta != "n":
         resposta = input(mensagem).strip().lower()
         if resposta != "s" and resposta != "n":
-            print("Responda com s (sim) ou n (não).")
+            print(formatacao.erro("Responda com s (sim) ou n (não)."))
     return resposta == "s"
+
+
+def esperar_enter(mensagem):
+    """Mostra a mensagem e espera o usuário teclar Enter (o que for digitado é ignorado)."""
+    input(mensagem)

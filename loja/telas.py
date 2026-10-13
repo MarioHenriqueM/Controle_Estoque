@@ -3,6 +3,8 @@
 Cada tela pergunta os dados (usando o módulo leitura), chama a regra
 correspondente e mostra o resultado. As telas que alteram o estado
 devolvem True, para que o main.py saiba que precisa salvar os dados.
+As mensagens passam por formatacao.sucesso/erro/aviso/titulo, que colorem
+o texto quando o terminal permite.
 """
 
 import datetime
@@ -15,6 +17,7 @@ from loja import leitura
 from loja import relatorios
 
 MAXIMO_CARACTERES_NOME = 30
+LARGURA_MENU = 52
 
 
 def data_hora_atual():
@@ -24,27 +27,45 @@ def data_hora_atual():
 
 
 def mostrar_menu():
+    moldura = "=" * LARGURA_MENU
     print()
-    print("========= CONTROLE DE ESTOQUE E VENDAS =========")
-    print("1 - Cadastrar produto")
-    print("2 - Registrar entrada de itens")
-    print("3 - Registrar saída avulsa (perda, avaria, uso interno)")
-    print("4 - Registrar venda")
-    print("5 - Consultar saldo de um produto")
-    print("6 - Listar estoque")
-    print("7 - Relatórios")
-    print("0 - Sair")
+    print(formatacao.titulo(moldura))
+    print(formatacao.titulo("           CONTROLE DE ESTOQUE E VENDAS"))
+    print(formatacao.titulo(moldura))
+    print("  1 - Cadastrar produto")
+    print("  2 - Registrar entrada de itens")
+    print("  3 - Registrar saída avulsa (perda, avaria, uso interno)")
+    print("  4 - Registrar venda")
+    print("  5 - Consultar saldo de um produto")
+    print("  6 - Listar estoque")
+    print("  7 - Relatórios")
+    print("  0 - Sair")
+    print("-" * LARGURA_MENU)
+
+
+def limpar_tela():
+    """Limpa a tela, se o terminal permitir (senão, não faz nada)."""
+    print(formatacao.codigo_limpar_tela(), end="")
+
+
+def pausar():
+    """Em terminal interativo, espera o Enter para dar tempo de ler o resultado
+    e depois limpa a tela. Com a entrada redirecionada (testes), não faz nada."""
+    if formatacao.TERMINAL_INTERATIVO:
+        print()
+        leitura.esperar_enter("Pressione Enter para continuar...")
+        limpar_tela()
 
 
 def escolher_produto(produtos):
     """Pede o código e devolve o produto encontrado, ou None (com aviso) se não existir."""
     if len(produtos) == 0:
-        print("Nenhum produto cadastrado.")
+        print(formatacao.aviso("Nenhum produto cadastrado."))
         return None
     codigo = leitura.ler_inteiro("Código do produto: ", 1)
     produto = cadastro.buscar_produto(produtos, codigo)
     if produto is None:
-        print("Produto não encontrado.")
+        print(formatacao.erro("Produto não encontrado."))
         return None
     nome = produto["nome"]
     saldo = produto["saldo"]
@@ -64,7 +85,7 @@ def escolher_motivo_saida():
     while opcao < 1 or opcao > quantidade_motivos:
         opcao = leitura.ler_inteiro("Escolha o motivo: ", 1)
         if opcao > quantidade_motivos:
-            print("Motivo inválido.")
+            print(formatacao.erro("Motivo inválido."))
     return estoque.MOTIVOS_SAIDA[opcao - 1]
 
 
@@ -73,10 +94,10 @@ def cadastrar_produto(produtos, movimentacoes):
     como uma movimentação de ENTRADA (motivo 'saldo inicial').
     Retorna: True se cadastrou (o estado foi alterado)."""
     print()
-    print("--- Cadastro de produto ---")
+    print(formatacao.titulo("--- Cadastro de produto ---"))
     codigo = leitura.ler_inteiro("Código do produto: ", 1)
     if cadastro.buscar_produto(produtos, codigo) is not None:
-        print(f"Já existe um produto com o código {codigo}. Cadastro cancelado.")
+        print(formatacao.erro(f"Já existe um produto com o código {codigo}. Cadastro cancelado."))
         return False
     nome = leitura.ler_texto("Nome: ", MAXIMO_CARACTERES_NOME)
     preco_centavos = leitura.ler_preco_centavos("Preço de venda (ex.: 19,99): ")
@@ -89,8 +110,8 @@ def cadastrar_produto(produtos, movimentacoes):
     quantidade_depois = len(produtos)
     preco = formatacao.formatar_moeda(preco_centavos)
     saldo = produto["saldo"]
-    print(f"Produto cadastrado: {nome} ({preco}), saldo {saldo}.")
-    print(f"Produtos cadastrados: {quantidade_antes} -> {quantidade_depois}")
+    print(formatacao.sucesso(f"Produto cadastrado: {nome} ({preco}), saldo {saldo}."))
+    print(formatacao.sucesso(f"Produtos cadastrados: {quantidade_antes} -> {quantidade_depois}"))
     return True
 
 
@@ -98,7 +119,7 @@ def registrar_entrada(produtos, movimentacoes):
     """Opção 2: entrada de itens no estoque (ex.: compra de mercadoria).
     Retorna: True se alterou o estado."""
     print()
-    print("--- Entrada de itens ---")
+    print(formatacao.titulo("--- Entrada de itens ---"))
     produto = escolher_produto(produtos)
     if produto is None:
         return False
@@ -108,7 +129,8 @@ def registrar_entrada(produtos, movimentacoes):
                               data_hora_atual(), estoque.MOTIVO_COMPRA)
     nome = produto["nome"]
     saldo_depois = produto["saldo"]
-    print(f"Entrada registrada. Saldo de {nome}: {saldo_antes} -> {saldo_depois}")
+    mensagem = f"Entrada registrada. Saldo de {nome}: {saldo_antes} -> {saldo_depois}"
+    print(formatacao.sucesso(mensagem))
     return True
 
 
@@ -116,37 +138,40 @@ def registrar_saida(produtos, movimentacoes):
     """Opção 3: saída avulsa (perda, avaria ou uso interno). NÃO gera receita.
     Retorna: True se alterou o estado."""
     print()
-    print("--- Saída avulsa ---")
+    print(formatacao.titulo("--- Saída avulsa ---"))
     produto = escolher_produto(produtos)
     if produto is None:
         return False
     saldo_antes = produto["saldo"]
     quantidade = leitura.ler_inteiro("Quantidade que vai sair: ", 1)
     if not estoque.tem_saldo_suficiente(produto, quantidade):
-        print(f"Saldo insuficiente (há {saldo_antes} unidade(s)). Nada foi alterado.")
+        mensagem = f"Saldo insuficiente (há {saldo_antes} unidade(s)). Nada foi alterado."
+        print(formatacao.erro(mensagem))
         return False
     motivo = escolher_motivo_saida()
     registrou = estoque.registrar_saida(produto, quantidade, movimentacoes,
                                         data_hora_atual(), estoque.TIPO_SAIDA, motivo)
     if not registrou:                 # defesa: a regra também recusa saída sem saldo
-        print(f"Saldo insuficiente (há {saldo_antes} unidade(s)). Nada foi alterado.")
+        mensagem = f"Saldo insuficiente (há {saldo_antes} unidade(s)). Nada foi alterado."
+        print(formatacao.erro(mensagem))
         return False
     nome = produto["nome"]
     saldo_depois = produto["saldo"]
-    print(f"Saída registrada ({motivo}). Saldo de {nome}: {saldo_antes} -> {saldo_depois}")
+    mensagem = f"Saída registrada ({motivo}). Saldo de {nome}: {saldo_antes} -> {saldo_depois}"
+    print(formatacao.sucesso(mensagem))
     return True
 
 
 def mostrar_carrinho(carrinho):
     """Mostra os itens do carrinho com subtotais e o total."""
     if len(carrinho) == 0:
-        print("Carrinho vazio.")
+        print(formatacao.aviso("Carrinho vazio."))
         return
     print("Carrinho:")
     for item in carrinho:
         print(formatacao.linha_item(item))
     total = formatacao.formatar_moeda(caixa.calcular_total(carrinho))
-    print(f"Total da venda: {total}")
+    print(formatacao.destaque(f"Total da venda: {total}"))
 
 
 def adicionar_item(produtos, carrinho):
@@ -158,27 +183,28 @@ def adicionar_item(produtos, carrinho):
     no_carrinho = caixa.quantidade_no_carrinho(carrinho, produto["codigo"])
     disponivel = produto["saldo"] - no_carrinho
     if disponivel <= 0:
-        print("Sem saldo disponível para este produto.")
+        print(formatacao.erro("Sem saldo disponível para este produto."))
         return
     quantidade = leitura.ler_inteiro("Quantidade: ", 1)
     if quantidade > disponivel:
-        print(f"Quantidade indisponível: há {disponivel} unidade(s) livre(s) deste produto.")
+        mensagem = f"Quantidade indisponível: há {disponivel} unidade(s) livre(s) deste produto."
+        print(formatacao.erro(mensagem))
         return
     caixa.adicionar_ao_carrinho(carrinho, produto, quantidade)
-    print("Item adicionado ao carrinho.")
+    print(formatacao.sucesso("Item adicionado ao carrinho."))
 
 
 def remover_item(carrinho):
     """Pede o código e tira o item do carrinho."""
     if len(carrinho) == 0:
-        print("O carrinho está vazio.")
+        print(formatacao.aviso("O carrinho está vazio."))
         return
     codigo = leitura.ler_inteiro("Código do produto a remover: ", 1)
     removeu = caixa.remover_do_carrinho(carrinho, codigo)
     if removeu:
-        print("Item removido do carrinho.")
+        print(formatacao.sucesso("Item removido do carrinho."))
     else:
-        print("Esse produto não está no carrinho.")
+        print(formatacao.erro("Esse produto não está no carrinho."))
 
 
 def imprimir_comprovante(venda):
@@ -187,21 +213,21 @@ def imprimir_comprovante(venda):
     data = venda["data"]
     total = formatacao.formatar_moeda(venda["total_centavos"])
     print()
-    print("=============== COMPROVANTE DE VENDA ===============")
+    print(formatacao.titulo("=============== COMPROVANTE DE VENDA ==============="))
     print(f"Venda {numero} - {data}")
     for item in venda["itens"]:
         print(formatacao.linha_item(item))
-    print(f"TOTAL: {total}")
-    print("====================================================")
+    print(formatacao.destaque(f"TOTAL: {total}"))
+    print(formatacao.titulo("===================================================="))
 
 
 def registrar_venda(produtos, vendas, movimentacoes):
     """Opção 4: venda com vários itens. Monta o carrinho, confirma e efetiva.
     Retorna: True se a venda foi registrada (o estado foi alterado)."""
     print()
-    print("--- Nova venda ---")
+    print(formatacao.titulo("--- Nova venda ---"))
     if len(produtos) == 0:
-        print("Nenhum produto cadastrado.")
+        print(formatacao.aviso("Nenhum produto cadastrado."))
         return False
     carrinho = []                     # lista nova a cada venda (nunca reaproveitada)
     montando = True
@@ -217,51 +243,52 @@ def registrar_venda(produtos, vendas, movimentacoes):
             mostrar_carrinho(carrinho)
         elif opcao == 3:
             if len(carrinho) == 0:
-                print("Adicione pelo menos um item antes de finalizar.")
+                print(formatacao.erro("Adicione pelo menos um item antes de finalizar."))
             else:
                 montando = False
         elif opcao == 0:
-            print("Venda cancelada. Nada foi alterado.")
+            print(formatacao.aviso("Venda cancelada. Nada foi alterado."))
             return False
         else:
-            print("Opção inválida.")
+            print(formatacao.erro("Opção inválida."))
 
     print()
     mostrar_carrinho(carrinho)
     if not leitura.ler_confirmacao("Confirmar a venda? (s/n): "):
-        print("Venda cancelada. Nada foi alterado.")
+        print(formatacao.aviso("Venda cancelada. Nada foi alterado."))
         return False
     vendas_antes = len(vendas)
     venda = caixa.efetivar_venda(produtos, vendas, movimentacoes, carrinho, data_hora_atual())
     if venda is None:
-        print("Algum item ficou sem saldo. Venda não realizada; nada foi alterado.")
+        mensagem = "Algum item ficou sem saldo. Venda não realizada; nada foi alterado."
+        print(formatacao.erro(mensagem))
         return False
     vendas_depois = len(vendas)
     imprimir_comprovante(venda)
-    print(f"Vendas registradas: {vendas_antes} -> {vendas_depois}")
+    print(formatacao.sucesso(f"Vendas registradas: {vendas_antes} -> {vendas_depois}"))
     for item in venda["itens"]:
         produto = cadastro.buscar_produto(produtos, item["codigo"])
         nome = produto["nome"]
         saldo_depois = produto["saldo"]
         saldo_antes = saldo_depois + item["quantidade"]
-        print(f"Saldo de {nome}: {saldo_antes} -> {saldo_depois}")
+        print(formatacao.sucesso(f"Saldo de {nome}: {saldo_antes} -> {saldo_depois}"))
     return True
 
 
 def consultar_saldo(produtos, movimentacoes):
     """Opção 5: mostra o saldo atual de um produto e o extrato de movimentações."""
     print()
-    print("--- Consulta de saldo ---")
+    print(formatacao.titulo("--- Consulta de saldo ---"))
     produto = escolher_produto(produtos)
     if produto is None:
         return
     print(formatacao.cabecalho_produtos())
     print(formatacao.linha_produto(produto))
     print()
-    print("Extrato de movimentações:")
+    print(formatacao.destaque("Extrato de movimentações:"))
     extrato = estoque.extrato_do_produto(movimentacoes, produto["codigo"])
     if len(extrato) == 0:
-        print("Nenhuma movimentação registrada para este produto.")
+        print(formatacao.aviso("Nenhuma movimentação registrada para este produto."))
         return
     print(formatacao.cabecalho_extrato())
     for movimentacao in extrato:
@@ -271,9 +298,9 @@ def consultar_saldo(produtos, movimentacoes):
 def listar_estoque(produtos):
     """Opção 6: lista todos os produtos em uma tabela."""
     print()
-    print("--- Estoque ---")
+    print(formatacao.titulo("--- Estoque ---"))
     if len(produtos) == 0:
-        print("Nenhum produto cadastrado.")
+        print(formatacao.aviso("Nenhum produto cadastrado."))
         return
     print(formatacao.cabecalho_produtos())
     total_unidades = 0
@@ -287,17 +314,17 @@ def listar_estoque(produtos):
 def relatorio_faturamento(vendas):
     """Relatório 1: soma das vendas, número de vendas e ticket médio."""
     print()
-    print("--- Faturamento total ---")
+    print(formatacao.titulo("--- Faturamento total ---"))
     quantidade_vendas = len(vendas)
     if quantidade_vendas == 0:
-        print("Nenhuma venda registrada.")
+        print(formatacao.aviso("Nenhuma venda registrada."))
         return
     total_centavos = relatorios.faturamento_total(vendas)
     ticket_centavos = relatorios.ticket_medio_centavos(total_centavos, quantidade_vendas)
     total = formatacao.formatar_moeda(total_centavos)
     ticket = formatacao.formatar_moeda(ticket_centavos)
     print(f"Vendas registradas: {quantidade_vendas}")
-    print(f"Faturamento total:  {total}")
+    print(formatacao.destaque(f"Faturamento total:  {total}"))
     print(f"Ticket médio:       {ticket}")
     print("(Saídas avulsas não entram no faturamento.)")
 
@@ -305,17 +332,17 @@ def relatorio_faturamento(vendas):
 def relatorio_vendas_por_produto(produtos, vendas):
     """Relatório 2: unidades e valor vendidos de cada produto."""
     print()
-    print("--- Vendas por produto ---")
+    print(formatacao.titulo("--- Vendas por produto ---"))
     if len(vendas) == 0:
-        print("Nenhuma venda registrada.")
+        print(formatacao.aviso("Nenhuma venda registrada."))
         return
     codigo = "Código"
     nome = "Nome"
     unidades = "Unidades"
     valor = "Valor vendido"
-    titulo = f"{codigo:>6}  {nome:<30}  {unidades:>8}  {valor:>14}"
-    print(titulo)
-    print("-" * len(titulo))
+    cabecalho = f"{codigo:>6}  {nome:<30}  {unidades:>8}  {valor:>14}"
+    print(cabecalho)
+    print("-" * len(cabecalho))
     resumo = relatorios.vendas_por_produto(produtos, vendas)
     for linha in resumo:
         codigo = linha["codigo"]
@@ -328,17 +355,17 @@ def relatorio_vendas_por_produto(produtos, vendas):
 def relatorio_valor_estoque(produtos):
     """Relatório 3: saldo x preço de cada produto e o total (a preço de venda)."""
     print()
-    print("--- Valor do estoque (a preço de venda) ---")
+    print(formatacao.titulo("--- Valor do estoque (a preço de venda) ---"))
     if len(produtos) == 0:
-        print("Nenhum produto cadastrado.")
+        print(formatacao.aviso("Nenhum produto cadastrado."))
         return
     codigo = "Código"
     nome = "Nome"
     saldo = "Saldo"
     valor = "Valor"
-    titulo = f"{codigo:>6}  {nome:<30}  {saldo:>7}  {valor:>14}"
-    print(titulo)
-    print("-" * len(titulo))
+    cabecalho = f"{codigo:>6}  {nome:<30}  {saldo:>7}  {valor:>14}"
+    print(cabecalho)
+    print("-" * len(cabecalho))
     linhas, total_centavos = relatorios.valor_do_estoque(produtos)
     for linha in linhas:
         codigo = linha["codigo"]
@@ -347,15 +374,15 @@ def relatorio_valor_estoque(produtos):
         valor = formatacao.formatar_moeda(linha["valor_centavos"])
         print(f"{codigo:>6}  {nome:<30}  {saldo:>7}  {valor:>14}")
     total = formatacao.formatar_moeda(total_centavos)
-    print(f"Valor total do estoque: {total}")
+    print(formatacao.destaque(f"Valor total do estoque: {total}"))
 
 
 def listar_vendas(vendas):
     """Relatório 4: reimprime o comprovante de todas as vendas."""
     print()
-    print("--- Todas as vendas ---")
+    print(formatacao.titulo("--- Todas as vendas ---"))
     if len(vendas) == 0:
-        print("Nenhuma venda registrada.")
+        print(formatacao.aviso("Nenhuma venda registrada."))
         return
     for venda in vendas:
         imprimir_comprovante(venda)
@@ -366,12 +393,12 @@ def menu_relatorios(produtos, vendas):
     no_menu = True
     while no_menu:
         print()
-        print("--- Relatórios ---")
-        print("1 - Faturamento total")
-        print("2 - Vendas por produto")
-        print("3 - Valor do estoque")
-        print("4 - Todas as vendas (comprovantes)")
-        print("0 - Voltar ao menu principal")
+        print(formatacao.titulo("--- Relatórios ---"))
+        print("  1 - Faturamento total")
+        print("  2 - Vendas por produto")
+        print("  3 - Valor do estoque")
+        print("  4 - Todas as vendas (comprovantes)")
+        print("  0 - Voltar ao menu principal")
         opcao = leitura.ler_inteiro("Escolha um relatório: ", 0)
         if opcao == 1:
             relatorio_faturamento(vendas)
@@ -384,4 +411,4 @@ def menu_relatorios(produtos, vendas):
         elif opcao == 0:
             no_menu = False
         else:
-            print("Opção inválida.")
+            print(formatacao.erro("Opção inválida."))
